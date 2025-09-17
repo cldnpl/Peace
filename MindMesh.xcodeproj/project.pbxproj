@@ -1,0 +1,382 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		AB0000000000000000000002 /* MindMeshApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000001 /* MindMeshApp.swift */; };
+		AB0000000000000000000004 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000003 /* Theme.swift */; };
+		AB0000000000000000000006 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000005 /* Models.swift */; };
+		AB0000000000000000000008 /* HomeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000007 /* HomeViewModel.swift */; };
+		AB0000000000000000000012 /* EmotionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000011 /* EmotionViewModel.swift */; };
+		AB0000000000000000000031 /* ReminderViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000032 /* ReminderViewModel.swift */; };
+		AB0000000000000000000014 /* SharedComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000013 /* SharedComponents.swift */; };
+		AB0000000000000000000016 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000015 /* MainTabView.swift */; };
+		AB0000000000000000000018 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000017 /* OnboardingView.swift */; };
+		AB0000000000000000000020 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000019 /* HomeView.swift */; };
+		AB0000000000000000000024 /* EmotionTrackerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000023 /* EmotionTrackerView.swift */; };
+		AB0000000000000000000026 /* AIInsightsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000025 /* AIInsightsView.swift */; };
+		AB0000000000000000000028 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000027 /* ProfileView.swift */; };
+		AB0000000000000000000030 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000029 /* Assets.xcassets */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		AA0000000000000000000005 /* MindMesh.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MindMesh.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AB0000000000000000000001 /* MindMeshApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MindMeshApp.swift; sourceTree = "<group>"; };
+		AB0000000000000000000003 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		AB0000000000000000000005 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		AB0000000000000000000007 /* HomeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewModel.swift; sourceTree = "<group>"; };
+		AB0000000000000000000011 /* EmotionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmotionViewModel.swift; sourceTree = "<group>"; };
+		AB0000000000000000000032 /* ReminderViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderViewModel.swift; sourceTree = "<group>"; };
+		AB0000000000000000000013 /* SharedComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedComponents.swift; sourceTree = "<group>"; };
+		AB0000000000000000000015 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
+		AB0000000000000000000017 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		AB0000000000000000000019 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		AB0000000000000000000023 /* EmotionTrackerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmotionTrackerView.swift; sourceTree = "<group>"; };
+		AB0000000000000000000025 /* AIInsightsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIInsightsView.swift; sourceTree = "<group>"; };
+		AB0000000000000000000027 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
+		AB0000000000000000000029 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		AA0000000000000000000007 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		AA0000000000000000000002 = {
+			isa = PBXGroup;
+			children = (
+				AA0000000000000000000015 /* MindMesh */,
+				AA0000000000000000000003 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		AA0000000000000000000003 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				AA0000000000000000000005 /* MindMesh.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		AA0000000000000000000015 /* MindMesh */ = {
+			isa = PBXGroup;
+			children = (
+				AB0000000000000000000001 /* MindMeshApp.swift */,
+				AA0000000000000000000016 /* Theme */,
+				AA0000000000000000000017 /* Models */,
+				AA0000000000000000000018 /* ViewModels */,
+				AA0000000000000000000019 /* Components */,
+				AA0000000000000000000020 /* Views */,
+				AB0000000000000000000029 /* Assets.xcassets */,
+			);
+			path = MindMesh;
+			sourceTree = "<group>";
+		};
+		AA0000000000000000000016 /* Theme */ = {
+			isa = PBXGroup;
+			children = (
+				AB0000000000000000000003 /* Theme.swift */,
+			);
+			path = Theme;
+			sourceTree = "<group>";
+		};
+		AA0000000000000000000017 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				AB0000000000000000000005 /* Models.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		AA0000000000000000000018 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				AB0000000000000000000007 /* HomeViewModel.swift */,
+				AB0000000000000000000011 /* EmotionViewModel.swift */,
+				AB0000000000000000000032 /* ReminderViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		AA0000000000000000000019 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				AB0000000000000000000013 /* SharedComponents.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		AA0000000000000000000020 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				AB0000000000000000000015 /* MainTabView.swift */,
+				AA0000000000000000000021 /* Onboarding */,
+				AA0000000000000000000022 /* Home */,
+				AA0000000000000000000024 /* EmotionTracker */,
+				AA0000000000000000000025 /* AIInsights */,
+				AA0000000000000000000026 /* Profile */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		AA0000000000000000000021 /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				AB0000000000000000000017 /* OnboardingView.swift */,
+			);
+			path = Onboarding;
+			sourceTree = "<group>";
+		};
+		AA0000000000000000000022 /* Home */ = {
+			isa = PBXGroup;
+			children = (
+				AB0000000000000000000019 /* HomeView.swift */,
+			);
+			path = Home;
+			sourceTree = "<group>";
+		};
+		AA0000000000000000000024 /* EmotionTracker */ = {
+			isa = PBXGroup;
+			children = (
+				AB0000000000000000000023 /* EmotionTrackerView.swift */,
+			);
+			path = EmotionTracker;
+			sourceTree = "<group>";
+		};
+		AA0000000000000000000025 /* AIInsights */ = {
+			isa = PBXGroup;
+			children = (
+				AB0000000000000000000025 /* AIInsightsView.swift */,
+			);
+			path = AIInsights;
+			sourceTree = "<group>";
+		};
+		AA0000000000000000000026 /* Profile */ = {
+			isa = PBXGroup;
+			children = (
+				AB0000000000000000000027 /* ProfileView.swift */,
+			);
+			path = Profile;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		AA0000000000000000000004 /* MindMesh */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AA0000000000000000000010 /* Build configuration list for PBXNativeTarget "MindMesh" */;
+			buildPhases = (
+				AA0000000000000000000006 /* Sources */,
+				AA0000000000000000000007 /* Frameworks */,
+				AA0000000000000000000008 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MindMesh;
+			productName = MindMesh;
+			productReference = AA0000000000000000000005 /* MindMesh.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		AA0000000000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2600;
+				LastUpgradeCheck = 2600;
+				TargetAttributes = {
+					AA0000000000000000000004 = {
+						CreatedOnToolsVersion = 26.3;
+					};
+				};
+			};
+			buildConfigurationList = AA0000000000000000000009 /* Build configuration list for PBXProject "MindMesh" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = AA0000000000000000000002;
+			productRefGroup = AA0000000000000000000003 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				AA0000000000000000000004 /* MindMesh */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		AA0000000000000000000008 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AB0000000000000000000030 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		AA0000000000000000000006 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AB0000000000000000000002 /* MindMeshApp.swift in Sources */,
+				AB0000000000000000000004 /* Theme.swift in Sources */,
+				AB0000000000000000000006 /* Models.swift in Sources */,
+				AB0000000000000000000008 /* HomeViewModel.swift in Sources */,
+				AB0000000000000000000012 /* EmotionViewModel.swift in Sources */,
+				AB0000000000000000000031 /* ReminderViewModel.swift in Sources */,
+				AB0000000000000000000014 /* SharedComponents.swift in Sources */,
+				AB0000000000000000000016 /* MainTabView.swift in Sources */,
+				AB0000000000000000000018 /* OnboardingView.swift in Sources */,
+				AB0000000000000000000020 /* HomeView.swift in Sources */,
+				AB0000000000000000000024 /* EmotionTrackerView.swift in Sources */,
+				AB0000000000000000000026 /* AIInsightsView.swift in Sources */,
+				AB0000000000000000000028 /* ProfileView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		AA0000000000000000000011 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		AA0000000000000000000012 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		AA0000000000000000000013 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = H4M7KJL5DT;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = MindMesh;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.claudianapolitano.mindmesh;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		AA0000000000000000000014 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = H4M7KJL5DT;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = MindMesh;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.claudianapolitano.mindmesh;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		AA0000000000000000000009 /* Build configuration list for PBXProject "MindMesh" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AA0000000000000000000011 /* Debug */,
+				AA0000000000000000000012 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AA0000000000000000000010 /* Build configuration list for PBXNativeTarget "MindMesh" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AA0000000000000000000013 /* Debug */,
+				AA0000000000000000000014 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = AA0000000000000000000001 /* Project object */;
+}
