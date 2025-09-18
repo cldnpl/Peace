@@ -15,16 +15,20 @@ struct EmotionTrackerView: View {
                 AmbientBackground()
 
                 ScrollView(showsIndicators: false) {
-                    VStack(alignment: .leading, spacing: MMSpacing.xxxl) {
-                        emotionSelector
-                        noteField
-                        logButton
+                    VStack(alignment: .leading, spacing: 0) {
+                        MMNavigationHeaderBlock(text: t.moodTitle, topPadding: MMSpacing.xxxl)
 
-                        if vm.showSuccess {
-                            successBanner
+                        VStack(alignment: .leading, spacing: MMSpacing.xl) {
+                            emotionSelector
+                            noteField
+                            logButton
+
+                            if vm.showSuccess {
+                                successBanner
+                            }
+
+                            energyChart
                         }
-
-                        energyChart
                     }
                     .padding(.bottom, 40)
                 }
@@ -33,8 +37,7 @@ struct EmotionTrackerView: View {
                 .scrollDismissesKeyboard(.interactively)
                 .mmCrownSelection($crownSelection, range: 0...Double(MoodLevel.allCases.count - 1))
             }
-            .navigationTitle(t.moodTitle)
-            .navigationBarTitleDisplayMode(.large)
+            .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.hidden, for: .navigationBar)
             .sensoryFeedback(.selection, trigger: vm.selectedMood?.rawValue ?? -1)
             .sensoryFeedback(.success, trigger: vm.showSuccess) { _, newValue in

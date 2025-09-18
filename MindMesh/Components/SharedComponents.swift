@@ -34,6 +34,40 @@ struct MMSectionLabel: View {
     }
 }
 
+struct MMNavigationHeader: View {
+    let text: String
+
+    var body: some View {
+        Text(text)
+            .font(MMFont.display(30, weight: .bold))
+            .foregroundStyle(.mmTextPrimary)
+    }
+}
+
+struct MMNavigationHeaderBlock: View {
+    let text: String
+    var topPadding: CGFloat = MMSpacing.sm
+    var bottomPadding: CGFloat = MMSpacing.md
+
+    var body: some View {
+        MMNavigationHeader(text: text)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.top, topPadding)
+            .padding(.bottom, bottomPadding)
+    }
+}
+
+struct MMNavigationBarTitle: View {
+    let text: String
+
+    var body: some View {
+        Text(text)
+            .font(MMFont.display(20, weight: .bold))
+            .foregroundStyle(.mmTextPrimary)
+            .lineLimit(1)
+    }
+}
+
 struct MMInlineBadge: View {
     let title: String
     var icon: String? = nil

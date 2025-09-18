@@ -22,72 +22,76 @@ struct SettingsView: View {
             ZStack {
                 AmbientBackground()
 
-                List {
-                    Section(t.settingsAppSection) {
-                        Toggle(t.darkTheme, isOn: $darkModeOn)
-                            .tint(.mmAccent)
+                VStack(spacing: 0) {
+                    MMNavigationHeaderBlock(text: t.settingsTitle)
+                        .padding(.horizontal, MMSpacing.lg)
 
-                        Toggle(t.dailyReminder, isOn: Binding(
-                            get: { reminderStore.isEnabled },
-                            set: { reminderStore.setEnabled($0) }
-                        ))
-                            .tint(.mmAccent)
+                    List {
+                        Section(t.settingsAppSection) {
+                            Toggle(t.darkTheme, isOn: $darkModeOn)
+                                .tint(.mmAccent)
 
-                        if reminderStore.isEnabled {
-                            DatePicker(
-                                t.reminderTime,
-                                selection: Binding(
-                                    get: { reminderStore.reminderTime },
-                                    set: { reminderStore.updateReminderTime($0) }
-                                ),
-                                displayedComponents: .hourAndMinute
-                            )
+                            Toggle(t.dailyReminder, isOn: Binding(
+                                get: { reminderStore.isEnabled },
+                                set: { reminderStore.setEnabled($0) }
+                            ))
+                                .tint(.mmAccent)
+
+                            if reminderStore.isEnabled {
+                                DatePicker(
+                                    t.reminderTime,
+                                    selection: Binding(
+                                        get: { reminderStore.reminderTime },
+                                        set: { reminderStore.updateReminderTime($0) }
+                                    ),
+                                    displayedComponents: .hourAndMinute
+                                )
+                            }
+
+                            Button {
+                                showPremiumSheet = true
+                            } label: {
+                                Label(
+                                    premiumStore.hasPremiumAccess ? t.managePremium : t.premiumTitle,
+                                    systemImage: premiumStore.hasPremiumAccess ? "checkmark.circle.fill" : "sparkles"
+                                )
+                            }
+                            .foregroundStyle(.mmTextPrimary)
                         }
 
-                        Button {
-                            showPremiumSheet = true
-                        } label: {
-                            Label(
-                                premiumStore.hasPremiumAccess ? t.managePremium : t.premiumTitle,
-                                systemImage: premiumStore.hasPremiumAccess ? "checkmark.circle.fill" : "sparkles"
-                            )
+                        Section(t.settingsLanguageSection) {
+                            Picker(t.settingsAppLanguage, selection: $languageStore.selectedLanguage) {
+                                ForEach(AppLanguage.allCases) { language in
+                                    Text(language.displayName).tag(language)
+                                }
+                            }
                         }
-                        .foregroundStyle(.mmTextPrimary)
-                    }
 
-                    Section(t.settingsLanguageSection) {
-                        Picker(t.settingsAppLanguage, selection: $languageStore.selectedLanguage) {
-                            ForEach(AppLanguage.allCases) { language in
-                                Text(language.displayName).tag(language)
+                        Section(t.settingsLegalSection) {
+                            NavigationLink {
+                                PrivacyPolicyView()
+                            } label: {
+                                Label(t.privacyPolicyTitle, systemImage: "hand.raised.fill")
+                            }
+                        }
+
+                        Section(t.infoSection) {
+                            LabeledContent(t.versionLabel, value: version)
+                        }
+
+                        Section {
+                            Button(t.signOut, role: .destructive) {
+                                storedUserName = ""
+                                hasSeenOnboarding = false
                             }
                         }
                     }
-
-                    Section(t.settingsLegalSection) {
-                        NavigationLink {
-                            PrivacyPolicyView()
-                        } label: {
-                            Label(t.privacyPolicyTitle, systemImage: "hand.raised.fill")
-                        }
-                    }
-
-                    Section(t.infoSection) {
-                        LabeledContent(t.versionLabel, value: version)
-                    }
-
-                    Section {
-                        Button(t.signOut, role: .destructive) {
-                            storedUserName = ""
-                            hasSeenOnboarding = false
-                        }
-                    }
+                    .listStyle(.insetGrouped)
+                    .scrollContentBackground(.hidden)
+                    .background(Color.clear)
                 }
-                .listStyle(.insetGrouped)
-                .scrollContentBackground(.hidden)
-                .background(Color.clear)
             }
-            .navigationTitle(t.settingsTitle)
-            .navigationBarTitleDisplayMode(.large)
+            .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.hidden, for: .navigationBar)
             .onAppear {
                 reminderStore.refreshAuthorizationStatus()
@@ -170,10 +174,13 @@ struct ProfileView: View {
                 .safeAreaPadding(.horizontal, MMSpacing.lg)
                 .safeAreaPadding(.bottom, MMSpacing.md)
             }
-            .navigationTitle(t.profileTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.hidden, for: .navigationBar)
             .toolbar {
+                ToolbarItem(placement: .principal) {
+                    MMNavigationBarTitle(text: t.profileTitle)
+                }
+
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(t.close) {
                         dismiss()
@@ -472,9 +479,13 @@ struct PrivacyPolicyView: View {
                 }
             }
         }
-        .navigationTitle(t.privacyPolicyTitle)
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.hidden, for: .navigationBar)
+        .toolbar {
+            ToolbarItem(placement: .principal) {
+                MMNavigationBarTitle(text: t.privacyPolicyTitle)
+            }
+        }
     }
 }
 

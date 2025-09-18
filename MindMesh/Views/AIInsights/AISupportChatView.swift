@@ -47,10 +47,13 @@ struct AISupportChatView: View {
 
                 composer
             }
-            .navigationTitle(t.premiumChatTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.hidden, for: .navigationBar)
             .toolbar {
+                ToolbarItem(placement: .principal) {
+                    MMNavigationBarTitle(text: t.premiumChatTitle)
+                }
+
                 ToolbarItem(placement: .topBarLeading) {
                     Button(t.close) {
                         dismiss()

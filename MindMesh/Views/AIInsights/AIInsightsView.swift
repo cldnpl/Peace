@@ -26,14 +26,18 @@ struct AIInsightsView: View {
                 AmbientBackground()
 
                 ScrollView(showsIndicators: false) {
-                    VStack(alignment: .leading, spacing: MMSpacing.xxxl) {
-                        if let snapshot = vm.snapshot {
-                            reflectionCard(snapshot: snapshot)
-                            overviewCard(snapshot: snapshot)
-                            detailCard(snapshot: snapshot)
-                            premiumCard(snapshot: snapshot)
-                        } else {
-                            emptyState
+                    VStack(alignment: .leading, spacing: 0) {
+                        MMNavigationHeaderBlock(text: t.insightsTitle, topPadding: MMSpacing.xxxl)
+
+                        VStack(alignment: .leading, spacing: MMSpacing.xl) {
+                            if let snapshot = vm.snapshot {
+                                reflectionCard(snapshot: snapshot)
+                                overviewCard(snapshot: snapshot)
+                                detailCard(snapshot: snapshot)
+                                premiumCard(snapshot: snapshot)
+                            } else {
+                                emptyState
+                            }
                         }
                     }
                     .padding(.bottom, 40)
@@ -41,8 +45,7 @@ struct AIInsightsView: View {
                 .safeAreaPadding(.horizontal, MMSpacing.lg)
                 .safeAreaPadding(.bottom, MMSpacing.md)
             }
-            .navigationTitle(t.insightsTitle)
-            .navigationBarTitleDisplayMode(.large)
+            .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.hidden, for: .navigationBar)
             .sheet(isPresented: $showPremiumSheet) {
                 PremiumSheet()

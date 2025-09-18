@@ -57,18 +57,18 @@ struct OnboardingView: View {
             PulsingCircle(color: .mmAccent, size: 126)
 
             Circle()
-                .fill(
-                    LinearGradient(
-                        colors: [.mmAccent, .mmAccent2, .mmAccent3],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
+                .fill(Color.mmCard.opacity(0.92))
                 .frame(width: 126, height: 126)
                 .overlay(
-                    Image(systemName: "scribble.variable")
-                        .font(.system(size: 42, weight: .light))
-                        .foregroundStyle(.white.opacity(0.94))
+                    Image("OnboardingHero")
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 118, height: 118)
+                        .clipShape(Circle())
+                )
+                .overlay(
+                    Circle()
+                        .strokeBorder(Color.white.opacity(0.44), lineWidth: 1.5)
                 )
                 .shadow(color: .mmAccent.opacity(0.28), radius: 30, x: 0, y: 14)
                 .scaleEffect(orb ? 1.03 : 1.0)

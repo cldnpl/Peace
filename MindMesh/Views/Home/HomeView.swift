@@ -4,6 +4,7 @@ struct HomeView: View {
     @StateObject private var vm = HomeViewModel()
     @EnvironmentObject private var languageStore: AppLanguageStore
     @State private var expandedNoteEntryID: UUID?
+    @State private var contentHeight: CGFloat = 0
 
     private var t: AppStrings {
         AppStrings(language: languageStore.selectedLanguage)
@@ -14,17 +15,35 @@ struct HomeView: View {
             ZStack {
                 AmbientBackground()
 
-                ScrollView(showsIndicators: false) {
-                    VStack(alignment: .leading, spacing: MMSpacing.xl) {
-                        Spacer()
-                        greetingBlock
-                        overviewCard
-                        moodCard
+                GeometryReader { proxy in
+                    let verticalInset = min(
+                        max(MMSpacing.lg, (proxy.size.height - contentHeight) / 2),
+                        MMSpacing.xxxl
+                    )
+
+                    ScrollView(showsIndicators: false) {
+                        VStack(alignment: .leading, spacing: MMSpacing.xl) {
+                            greetingBlock
+
+                            VStack(alignment: .leading, spacing: MMSpacing.xl) {
+                                overviewCard
+                                moodCard
+                            }
+                        }
+                        .background(
+                            GeometryReader { contentProxy in
+                                Color.clear
+                                    .preference(key: HomeContentHeightPreferenceKey.self, value: contentProxy.size.height)
+                            }
+                        )
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.top, verticalInset)
+                        .padding(.bottom, MMSpacing.xl)
                     }
-                    .padding(.bottom, MMSpacing.xl)
+                    .safeAreaPadding(.horizontal, MMSpacing.md)
+                    .safeAreaPadding(.bottom, MMSpacing.sm)
+                    .onPreferenceChange(HomeContentHeightPreferenceKey.self) { contentHeight = $0 }
                 }
-                .safeAreaPadding(.horizontal, MMSpacing.md)
-                .safeAreaPadding(.bottom, MMSpacing.sm)
             }
             .navigationBarTitleDisplayMode(.large)
             .toolbarBackground(.hidden, for: .navigationBar)
@@ -33,7 +52,6 @@ struct HomeView: View {
 
     private var greetingBlock: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Spacer()
             Text(vm.greetingLine(language: languageStore.selectedLanguage))
                 .font(MMFont.display(26, weight: .bold))
                 .foregroundStyle(.mmTextPrimary)
@@ -43,6 +61,7 @@ struct HomeView: View {
                 .foregroundStyle(.mmTextMuted)
                 .lineSpacing(3)
         }
+        .padding(.bottom, MMSpacing.md)
     }
 
     private var overviewCard: some View {
@@ -206,6 +225,14 @@ struct HomeView: View {
         withAnimation(.spring(response: 0.28, dampingFraction: 0.84)) {
             expandedNoteEntryID = expandedNoteEntryID == entry.id ? nil : entry.id
         }
+    }
+}
+
+private struct HomeContentHeightPreferenceKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = nextValue()
     }
 }
 
