@@ -123,4 +123,4 @@ In **Assets.xcassets**, puoi aggiungere un **AccentColor**:
 
 ---
 
-*Built @ Apple Developer Academy, Napoli · VentureLab 2025*
+*Built @ Apple Developer Academy, Napoli · VentureLab 2025* 
