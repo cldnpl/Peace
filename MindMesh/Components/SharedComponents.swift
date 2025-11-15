@@ -192,21 +192,21 @@ struct AmbientBackground: View {
     var body: some View {
         ZStack {
             LinearGradient(
-                colors: [Color(hex: "fbfdff"), Color(hex: "eef7ff"), Color(hex: "f8fbff")],
+                colors: [.mmBackground, .mmSurface, .mmCard],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
             .ignoresSafeArea()
 
             EllipticalGradient(
-                colors: [Color.mmAccent2.opacity(0.24), .clear],
+                colors: [Color.mmAccent2.opacity(0.20), .clear],
                 center: .init(x: 0.18, y: 0.10),
                 endRadiusFraction: 0.74
             )
             .ignoresSafeArea()
 
             EllipticalGradient(
-                colors: [Color.mmTeal.opacity(0.18), .clear],
+                colors: [Color.mmTeal.opacity(0.14), .clear],
                 center: .init(x: 0.78, y: 0.42),
                 endRadiusFraction: 0.68
             )
@@ -220,7 +220,7 @@ struct AmbientBackground: View {
             .ignoresSafeArea()
 
             EllipticalGradient(
-                colors: [Color.mmAmber.opacity(0.10), .clear],
+                colors: [Color.mmAmber.opacity(0.08), .clear],
                 center: .init(x: 0.84, y: 0.82),
                 endRadiusFraction: 0.50
             )

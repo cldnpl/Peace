@@ -2,6 +2,8 @@ import SwiftUI
 
 struct AIInsightsView: View {
     @ObservedObject private var store = MoodJournalStore.shared
+    @AppStorage("peace.premiumUnlocked") private var premiumUnlocked = false
+    @State private var showPremiumSheet = false
 
     private var snapshot: MoodReflectionSnapshot? {
         store.reflectionSnapshot()
@@ -16,12 +18,13 @@ struct AIInsightsView: View {
                     VStack(alignment: .leading, spacing: MMSpacing.xxxl) {
                         if let snapshot {
                             reflectionCard(snapshot: snapshot)
+                            overviewCard(snapshot: snapshot)
                             detailCard(snapshot: snapshot)
+                            premiumCard(snapshot: snapshot)
                         } else {
                             emptyState
                         }
                     }
-                    .padding(.top, MMSpacing.lg)
                     .padding(.bottom, 40)
                 }
                 .safeAreaPadding(.horizontal, MMSpacing.lg)
@@ -29,6 +32,10 @@ struct AIInsightsView: View {
             }
             .navigationTitle("Riflessioni")
             .navigationBarTitleDisplayMode(.large)
+            .toolbarBackground(.hidden, for: .navigationBar)
+            .sheet(isPresented: $showPremiumSheet) {
+                PremiumSheet()
+            }
         }
     }
 
@@ -74,6 +81,90 @@ struct AIInsightsView: View {
         }
     }
 
+    private func overviewCard(snapshot: MoodReflectionSnapshot) -> some View {
+        MMCard(backgroundColor: Color.mmCard.opacity(0.9)) {
+            VStack(alignment: .leading, spacing: MMSpacing.lg) {
+                MMSectionLabel(text: "Panoramica")
+
+                HStack(spacing: MMSpacing.md) {
+                    StatCard(value: snapshot.dominantMoodLabel, label: "Voce che torna di più", color: .mmAccent)
+                    StatCard(value: snapshot.trendLabel, label: "Andamento recente", color: .mmAccent3)
+                }
+
+                HStack(spacing: MMSpacing.md) {
+                    StatCard(value: snapshot.energyLabel, label: "Energia media", color: .mmTeal)
+                    StatCard(value: snapshot.consistencyLabel, label: "Quanto cambia il tono", color: .mmRose)
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func premiumCard(snapshot: MoodReflectionSnapshot) -> some View {
+        if premiumUnlocked {
+            MMCard(borderColor: Color.mmAccent.opacity(0.18), backgroundColor: Color.mmCard.opacity(0.94)) {
+                VStack(alignment: .leading, spacing: MMSpacing.lg) {
+                    HStack {
+                        MMSectionLabel(text: "Analisi completa")
+                        Spacer()
+                        MMInlineBadge(title: "Premium", icon: "sparkles", tint: .mmAccent)
+                    }
+
+                    Text(snapshot.premiumInsightTitle)
+                        .font(MMFont.title(22, weight: .semibold))
+                        .foregroundStyle(.mmTextPrimary)
+
+                    Text(snapshot.premiumInsightMessage)
+                        .font(MMFont.body(15))
+                        .foregroundStyle(.mmTextMuted)
+                        .lineSpacing(4)
+
+                    MMCard(
+                        padding: MMSpacing.lg,
+                        cornerRadius: MMRadius.md,
+                        borderColor: Color.mmAccent2.opacity(0.18),
+                        backgroundColor: Color.mmSurface.opacity(0.72)
+                    ) {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Spunto pratico")
+                                .font(MMFont.caption(12, weight: .semibold))
+                                .foregroundStyle(.mmTextMuted)
+
+                            Text(snapshot.premiumSuggestion)
+                                .font(MMFont.body(14))
+                                .foregroundStyle(.mmTextPrimary)
+                                .lineSpacing(3)
+                        }
+                    }
+                }
+            }
+        } else {
+            MMCard(borderColor: Color.mmAccent.opacity(0.14), backgroundColor: Color.mmCard.opacity(0.92)) {
+                VStack(alignment: .leading, spacing: MMSpacing.lg) {
+                    HStack {
+                        MMSectionLabel(text: "Analisi completa")
+                        Spacer()
+                        Image(systemName: "lock.fill")
+                            .foregroundStyle(.mmAccent)
+                    }
+
+                    Text("La panoramica è pronta. L'analisi completa si sblocca con Premium.")
+                        .font(MMFont.title(22, weight: .semibold))
+                        .foregroundStyle(.mmTextPrimary)
+
+                    Text("Con Premium puoi leggere un pattern più preciso, il livello di stabilità e uno spunto pratico costruito sui tuoi ultimi check-in.")
+                        .font(MMFont.body(14))
+                        .foregroundStyle(.mmTextMuted)
+                        .lineSpacing(4)
+
+                    MMPrimaryButton(title: "Sblocca l'analisi completa", icon: "sparkles") {
+                        showPremiumSheet = true
+                    }
+                }
+            }
+        }
+    }
+
     private var emptyState: some View {
         MMCard(borderColor: Color.mmAccent.opacity(0.14), backgroundColor: Color.mmCard.opacity(0.92)) {
             VStack(alignment: .leading, spacing: MMSpacing.lg) {
@@ -90,7 +181,7 @@ struct AIInsightsView: View {
                     .font(MMFont.display(28, weight: .bold))
                     .foregroundStyle(.mmTextPrimary)
 
-                Text("Registra piu spesso il tuo umore nei prossimi giorni. Quando ci saranno almeno 3 registrazioni recenti, qui comparira un'analisi reale.")
+                Text("Registra piu spesso il tuo umore nei prossimi giorni. Quando ci saranno almeno 3 registrazioni recenti, qui comparira una panoramica reale dell'andamento.")
                     .font(MMFont.body(15))
                     .foregroundStyle(.mmTextMuted)
                     .lineSpacing(4)

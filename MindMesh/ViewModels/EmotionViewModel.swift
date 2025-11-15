@@ -7,6 +7,13 @@ struct MoodReflectionSnapshot {
     let detailTitle: String
     let detailValue: String
     let detailMessage: String
+    let dominantMoodLabel: String
+    let trendLabel: String
+    let energyLabel: String
+    let consistencyLabel: String
+    let premiumInsightTitle: String
+    let premiumInsightMessage: String
+    let premiumSuggestion: String
 }
 
 @MainActor
@@ -46,9 +53,8 @@ final class MoodJournalStore: ObservableObject {
         let recentEntries = recentEntries(lastDays: lastDays)
         guard recentEntries.count >= minimumEntries else { return nil }
 
-        let averageEnergy = recentEntries
-            .map(\.mood.energyValue)
-            .reduce(0, +) / Double(recentEntries.count)
+        let energyValues = recentEntries.map(\.mood.energyValue)
+        let averageEnergy = energyValues.reduce(0, +) / Double(recentEntries.count)
 
         let firstHalf = Array(recentEntries.prefix(max(1, recentEntries.count / 2)))
         let secondHalf = Array(recentEntries.suffix(max(1, recentEntries.count / 2)))
@@ -56,6 +62,7 @@ final class MoodJournalStore: ObservableObject {
         let firstAverage = firstHalf.map(\.mood.energyValue).reduce(0, +) / Double(firstHalf.count)
         let secondAverage = secondHalf.map(\.mood.energyValue).reduce(0, +) / Double(secondHalf.count)
         let trend = secondAverage - firstAverage
+        let energySpread = (energyValues.max() ?? averageEnergy) - (energyValues.min() ?? averageEnergy)
 
         let dominantMood = recentEntries
             .reduce(into: [MoodLevel: Int]()) { counts, entry in
@@ -89,12 +96,69 @@ final class MoodJournalStore: ObservableObject {
             detailMessage = "Il tono cambia poco: segno utile, non noioso."
         }
 
+        let trendLabel: String
+        if trend > 0.12 {
+            trendLabel = "In lieve salita"
+        } else if trend < -0.12 {
+            trendLabel = "In lieve calo"
+        } else {
+            trendLabel = "Abbastanza stabile"
+        }
+
+        let energyLabel: String
+        if averageEnergy >= 0.78 {
+            energyLabel = "Energia alta"
+        } else if averageEnergy >= 0.56 {
+            energyLabel = "Energia moderata"
+        } else {
+            energyLabel = "Energia delicata"
+        }
+
+        let consistencyLabel: String
+        if energySpread < 0.18 {
+            consistencyLabel = "Molto regolare"
+        } else if energySpread < 0.36 {
+            consistencyLabel = "Abbastanza regolare"
+        } else {
+            consistencyLabel = "Più variabile"
+        }
+
+        let premiumInsightTitle: String
+        let premiumInsightMessage: String
+        let premiumSuggestion: String
+
+        switch (dominantMood, trend > 0.12, trend < -0.12) {
+        case (.anxious, _, true):
+            premiumInsightTitle = "C'è un attrito che torna spesso"
+            premiumInsightMessage = "La parte finale dei check-in sembra più tesa dell'inizio. Non è un picco isolato: è un segnale da prendere sul serio, ma senza allarme."
+            premiumSuggestion = "Nei prossimi due giorni prova a tenere leggero almeno un impegno e nota se il tono si abbassa."
+        case (.good, true, _), (.excellent, true, _):
+            premiumInsightTitle = "Stai recuperando bene"
+            premiumInsightMessage = "L'energia media sale e il tono dominante resta positivo. È il momento in cui conviene consolidare il ritmo, non riempire tutto."
+            premiumSuggestion = "Proteggi le abitudini che hanno funzionato questa settimana e non aggiungere troppo rumore."
+        case (.neutral, _, _):
+            premiumInsightTitle = "La base regge"
+            premiumInsightMessage = "Non emergono strappi forti. Il quadro è più di continuità che di picchi, e questo è utile perché rende leggibili i cambi veri."
+            premiumSuggestion = "Continua a registrarti con costanza: con altri check-in il pattern diventa molto più nitido."
+        default:
+            premiumInsightTitle = "C'è un pattern leggibile"
+            premiumInsightMessage = "Il tono dominante è \(dominantMood.label.lowercased()) e il ritmo generale è \(trendLabel.lowercased()). Non basta per una diagnosi, ma basta per orientarti meglio."
+            premiumSuggestion = "Guarda soprattutto cosa succede nei giorni in cui senti più attrito o più slancio: lì si vede il pattern vero."
+        }
+
         return MoodReflectionSnapshot(
             title: title,
             message: message,
             detailTitle: detailTitle,
             detailValue: detailValue,
-            detailMessage: detailMessage
+            detailMessage: detailMessage,
+            dominantMoodLabel: dominantMood.label,
+            trendLabel: trendLabel,
+            energyLabel: energyLabel,
+            consistencyLabel: consistencyLabel,
+            premiumInsightTitle: premiumInsightTitle,
+            premiumInsightMessage: premiumInsightMessage,
+            premiumSuggestion: premiumSuggestion
         )
     }
 

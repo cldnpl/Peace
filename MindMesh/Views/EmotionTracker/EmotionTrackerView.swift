@@ -22,7 +22,6 @@ struct EmotionTrackerView: View {
                         weekStrip
                         energyChart
                     }
-                    .padding(.top, MMSpacing.lg)
                     .padding(.bottom, 40)
                 }
                 .safeAreaPadding(.horizontal, MMSpacing.lg)
@@ -32,6 +31,7 @@ struct EmotionTrackerView: View {
             }
             .navigationTitle("Umore")
             .navigationBarTitleDisplayMode(.large)
+            .toolbarBackground(.hidden, for: .navigationBar)
             .sensoryFeedback(.selection, trigger: vm.selectedMood?.rawValue ?? -1)
             .sensoryFeedback(.success, trigger: vm.showSuccess) { _, newValue in
                 newValue

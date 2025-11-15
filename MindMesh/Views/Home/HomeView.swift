@@ -14,7 +14,6 @@ struct HomeView: View {
                         overviewCard
                         moodCard
                     }
-                    .padding(.top, MMSpacing.sm)
                     .padding(.bottom, MMSpacing.xl)
                 }
                 .safeAreaPadding(.horizontal, MMSpacing.md)
@@ -22,6 +21,7 @@ struct HomeView: View {
             }
             .navigationTitle("Home")
             .navigationBarTitleDisplayMode(.large)
+            .toolbarBackground(.hidden, for: .navigationBar)
         }
     }
 

@@ -40,12 +40,21 @@ private extension Color {
             }
         )
     }
+
+    static func dynamicSystem(light: UIColor, dark: UIColor? = nil, alpha: CGFloat = 1) -> Color {
+        Color(
+            uiColor: UIColor { trait in
+                let baseColor = trait.userInterfaceStyle == .dark ? (dark ?? light) : light
+                return baseColor.withAlphaComponent(alpha)
+            }
+        )
+    }
 }
 
 private enum MMColors {
-    static let background   = Color.dynamic(light: "f8fcff", dark: "09111d")
-    static let surface      = Color.dynamic(light: "edf6ff", dark: "121d30")
-    static let card         = Color.dynamic(light: "ffffff", dark: "18253a")
+    static let background   = Color.dynamic(light: "f8fcff", dark: "0A0E17")
+    static let surface      = Color.dynamicSystem(light: UIColor(hex: "edf6ff"), dark: UIColor(hex: "1C2533"))
+    static let card         = Color.dynamicSystem(light: .secondarySystemBackground, dark: UIColor(hex: "1C2533"))
     static let accent       = Color.dynamic(light: "5f95ff", dark: "78a9ff")
     static let accent2      = Color.dynamic(light: "a7d3ff", dark: "8ec3ff")
     static let accent3      = Color.dynamic(light: "72d0f2", dark: "67c7f0")
@@ -53,11 +62,11 @@ private enum MMColors {
     static let rose         = Color.dynamic(light: "90a9ff", dark: "a7b8ff")
     static let amber        = Color.dynamic(light: "d6e9ff", dark: "d9ebff")
     static let green        = Color.dynamic(light: "9cd7d0", dark: "a8e0d9")
-    static let textPrimary  = Color.dynamic(light: "1a2c43", dark: "edf6ff")
-    static let textMuted    = Color.dynamic(light: "415672", dark: "d6e6fa", alpha: 0.76)
-    static let textDim      = Color.dynamic(light: "415672", dark: "d6e6fa", alpha: 0.46)
-    static let border       = Color.dynamic(light: "1a2c43", dark: "edf6ff", alpha: 0.08)
-    static let borderStrong = Color.dynamic(light: "1a2c43", dark: "edf6ff", alpha: 0.16)
+    static let textPrimary  = Color.dynamicSystem(light: UIColor(hex: "1a2c43"), dark: .label)
+    static let textMuted    = Color.dynamicSystem(light: UIColor(hex: "415672"), dark: .secondaryLabel, alpha: 0.88)
+    static let textDim      = Color.dynamicSystem(light: UIColor(hex: "415672"), dark: .secondaryLabel, alpha: 0.62)
+    static let border       = Color.dynamic(light: "1a2c43", dark: "F2F2F7", alpha: 0.08)
+    static let borderStrong = Color.dynamic(light: "1a2c43", dark: "F2F2F7", alpha: 0.18)
 }
 
 extension Color {
@@ -148,7 +157,7 @@ extension LinearGradient {
     )
 
     static let mmHeroGradient = LinearGradient(
-        colors: [Color(hex: "feffff"), Color(hex: "eaf6ff"), Color(hex: "cfe7ff")],
+        colors: [.mmBackground, .mmSurface, Color.dynamic(light: "cfe7ff", dark: "102039")],
         startPoint: .topLeading,
         endPoint: .bottomTrailing
     )
@@ -160,7 +169,7 @@ extension View {
     }
 
     func mmCardShadow() -> some View {
-        shadow(color: Color.mmTextPrimary.opacity(0.06), radius: 22, x: 0, y: 10)
+        shadow(color: Color.mmTextPrimary.opacity(0.05), radius: 22, x: 0, y: 10)
     }
 }
 

@@ -4,6 +4,7 @@ struct SettingsView: View {
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = true
     @AppStorage("darkModeEnabled") private var darkModeOn = false
     @AppStorage("peace.userName") private var storedUserName = ""
+    @AppStorage("peace.premiumUnlocked") private var premiumUnlocked = false
     @ObservedObject private var reminderStore = ReminderStore.shared
     @State private var showPremiumSheet = false
     @State private var showProfile = false
@@ -44,7 +45,7 @@ struct SettingsView: View {
                         Button {
                             showPremiumSheet = true
                         } label: {
-                            Label("Peace Premium", systemImage: "sparkles")
+                            Label(premiumUnlocked ? "Premium attivo" : "Peace Premium", systemImage: premiumUnlocked ? "checkmark.circle.fill" : "sparkles")
                         }
                         .foregroundStyle(.mmTextPrimary)
                     }
@@ -67,6 +68,7 @@ struct SettingsView: View {
             }
             .navigationTitle("Impostazioni")
             .navigationBarTitleDisplayMode(.large)
+            .toolbarBackground(.hidden, for: .navigationBar)
             .onAppear {
                 reminderStore.refreshAuthorizationStatus()
             }
@@ -96,6 +98,7 @@ struct SettingsView: View {
 struct ProfileView: View {
     @Environment(\.dismiss) private var dismiss
     @AppStorage("peace.userName") private var storedUserName = ""
+    @AppStorage("peace.premiumUnlocked") private var premiumUnlocked = false
     @ObservedObject private var moodStore = MoodJournalStore.shared
     @State private var showPremiumSheet = false
 
@@ -124,11 +127,10 @@ struct ProfileView: View {
                             StatCard(value: "\(recentCheckinsCount)", label: "Check-in ultimi 7 giorni", color: .mmAccent3)
                         }
 
-                        MMPrimaryButton(title: "Scopri Premium", icon: "sparkles", gradient: .mmRoseGradient, glowColor: .mmRose) {
+                        MMPrimaryButton(title: premiumUnlocked ? "Premium attivo" : "Scopri Premium", icon: premiumUnlocked ? "checkmark.circle.fill" : "sparkles", gradient: .mmRoseGradient, glowColor: .mmRose) {
                             showPremiumSheet = true
                         }
                     }
-                    .padding(.top, MMSpacing.lg)
                     .padding(.bottom, 40)
                 }
                 .safeAreaPadding(.horizontal, MMSpacing.lg)
@@ -136,6 +138,7 @@ struct ProfileView: View {
             }
             .navigationTitle("Profilo")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(.hidden, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Chiudi") {
@@ -184,9 +187,9 @@ struct ProfileView: View {
     }
 }
 
-private struct PremiumSheet: View {
+struct PremiumSheet: View {
     @Environment(\.dismiss) private var dismiss
-    @State private var showComingSoon = false
+    @AppStorage("peace.premiumUnlocked") private var premiumUnlocked = false
 
     private let features = [
         ("sparkles", "Riflessioni più profonde", "Spunti meno generici e più mirati."),
@@ -255,13 +258,16 @@ private struct PremiumSheet: View {
 
                     VStack(spacing: 12) {
                         MMPrimaryButton(
-                            title: "Passa a Premium · €4,99 al mese",
-                            icon: "sparkles",
+                            title: premiumUnlocked ? "Premium già attivo" : "Attiva Premium · €4,99 al mese",
+                            icon: premiumUnlocked ? "checkmark.circle.fill" : "sparkles",
                             gradient: LinearGradient.mmAccentGradient,
                             glowColor: .mmAccent
                         ) {
-                            showComingSoon = true
+                            premiumUnlocked = true
+                            dismiss()
                         }
+                        .disabled(premiumUnlocked)
+                        .opacity(premiumUnlocked ? 0.7 : 1)
 
                         MMSecondaryButton(title: "Non adesso") {
                             dismiss()
@@ -271,11 +277,6 @@ private struct PremiumSheet: View {
                 }
                 .padding(.horizontal, MMSpacing.xl)
             }
-        }
-        .alert("Acquisti in arrivo", isPresented: $showComingSoon) {
-            Button("Va bene", role: .cancel) {}
-        } message: {
-            Text("Per ora è un'anteprima. Quando gli acquisti saranno pronti, potrai attivarli da qui.")
         }
     }
 }
