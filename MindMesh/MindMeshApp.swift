@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct MindMeshApp: App {
+struct PeaceApp: App {
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
     @AppStorage("darkModeEnabled") private var darkModeEnabled = false
 

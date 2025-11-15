@@ -2,8 +2,10 @@ import SwiftUI
 
 struct OnboardingView: View {
     @Binding var hasSeenOnboarding: Bool
+    @AppStorage("peace.userName") private var storedUserName = ""
     @State private var orb = false
     @State private var appear = false
+    @State private var draftName = ""
 
     private let features = [
         ("text.alignleft", "Sintesi chiare", "Trovi subito il punto della giornata senza schermate inutili."),
@@ -17,10 +19,10 @@ struct OnboardingView: View {
 
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 0) {
-                    Spacer(minLength: MMSpacing.xxxl)
+                    Spacer(minLength: MMSpacing.xl)
 
                     hero
-                        .padding(.bottom, MMSpacing.xxxl)
+                        .padding(.bottom, MMSpacing.xxl)
 
                     intro
                         .padding(.bottom, MMSpacing.xxl)
@@ -36,6 +38,7 @@ struct OnboardingView: View {
         }
         .onAppear {
             orb = true
+            draftName = storedUserName
             withAnimation(.easeOut(duration: 0.8).delay(0.15)) {
                 appear = true
             }
@@ -66,17 +69,17 @@ struct OnboardingView: View {
         }
         .frame(maxWidth: .infinity)
         .opacity(appear ? 1 : 0)
-        .offset(y: appear ? 0 : 26)
+        .padding(.top, MMSpacing.lg)
     }
 
     private var intro: some View {
         VStack(spacing: 14) {
-            Text("Metti ordine nei pensieri.")
+            Text("Benvenuto/a in Peace.")
                 .font(.system(size: 38, weight: .bold, design: .serif))
                 .foregroundStyle(.mmTextPrimary)
                 .multilineTextAlignment(.center)
 
-            Text("MindMesh ti aiuta a ritrovare il filo tra idee, umore e piccole decisioni quotidiane. Senza schermate che urlano.")
+            Text("Un posto semplice per capire come stai, con calma. Prima di iniziare, dimmi solo come vuoi essere chiamato/a.")
                 .font(.system(size: 16, weight: .regular))
                 .foregroundStyle(.mmTextMuted)
                 .multilineTextAlignment(.center)
@@ -122,17 +125,40 @@ struct OnboardingView: View {
 
     private var actions: some View {
         VStack(spacing: 12) {
-            MMPrimaryButton(title: "Entra in MindMesh", icon: "arrow.right") {
+            VStack(alignment: .leading, spacing: 10) {
+                MMSectionLabel(text: "Il tuo nome")
+
+                TextField("Come ti chiami?", text: $draftName)
+                    .font(MMFont.body(16))
+                    .foregroundStyle(.mmTextPrimary)
+                    .textInputAutocapitalization(.words)
+                    .autocorrectionDisabled()
+                    .padding(MMSpacing.lg)
+                    .background(
+                        RoundedRectangle(cornerRadius: MMRadius.md, style: .continuous)
+                            .fill(Color.mmCard.opacity(0.94))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: MMRadius.md, style: .continuous)
+                                    .strokeBorder(Color.mmBorderStrong, lineWidth: 1)
+                            )
+                            .mmCardShadow()
+                    )
+            }
+
+            MMPrimaryButton(title: "Continua", icon: "arrow.right") {
+                storedUserName = normalizedName
                 withAnimation(.spring(response: 0.4, dampingFraction: 0.86)) {
                     hasSeenOnboarding = true
                 }
             }
-
-            MMSecondaryButton(title: "Ho gia un profilo") {
-                hasSeenOnboarding = true
-            }
+            .disabled(normalizedName.isEmpty)
+            .opacity(normalizedName.isEmpty ? 0.48 : 1)
         }
         .opacity(appear ? 1 : 0)
+    }
+
+    private var normalizedName: String {
+        draftName.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }
 

@@ -3,6 +3,7 @@ import SwiftUI
 struct SettingsView: View {
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = true
     @AppStorage("darkModeEnabled") private var darkModeOn = false
+    @AppStorage("peace.userName") private var storedUserName = ""
     @ObservedObject private var reminderStore = ReminderStore.shared
     @State private var showPremiumSheet = false
     @State private var showProfile = false
@@ -43,7 +44,7 @@ struct SettingsView: View {
                         Button {
                             showPremiumSheet = true
                         } label: {
-                            Label("MindMesh Premium", systemImage: "sparkles")
+                            Label("Peace Premium", systemImage: "sparkles")
                         }
                         .foregroundStyle(.mmTextPrimary)
                     }
@@ -51,13 +52,11 @@ struct SettingsView: View {
                     Section("Info") {
                         LabeledContent("Versione", value: version)
 
-                        Link(destination: URL(string: "https://mindmesh.app")!) {
-                            Label("Sito web", systemImage: "safari")
-                        }
                     }
 
                     Section {
                         Button("Esci dal profilo", role: .destructive) {
+                            storedUserName = ""
                             hasSeenOnboarding = false
                         }
                     }
@@ -96,6 +95,7 @@ struct SettingsView: View {
 
 struct ProfileView: View {
     @Environment(\.dismiss) private var dismiss
+    @AppStorage("peace.userName") private var storedUserName = ""
     @ObservedObject private var moodStore = MoodJournalStore.shared
     @State private var showPremiumSheet = false
 
@@ -103,6 +103,11 @@ struct ProfileView: View {
         let calendar = Calendar.current
         let cutoff = calendar.date(byAdding: .day, value: -7, to: .now) ?? .distantPast
         return moodStore.entries.filter { $0.date >= cutoff }.count
+    }
+
+    private var displayName: String {
+        let trimmed = storedUserName.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? "Tu" : trimmed
     }
 
     var body: some View {
@@ -158,7 +163,7 @@ struct ProfileView: View {
                         )
 
                     VStack(alignment: .leading, spacing: 6) {
-                        Text("Claudia")
+                        Text(displayName)
                             .font(MMFont.display(28, weight: .bold))
                             .foregroundStyle(.mmTextPrimary)
 
@@ -206,7 +211,7 @@ private struct PremiumSheet: View {
                                     .foregroundStyle(.mmAccent)
                             )
 
-                        Text("MindMesh Premium")
+                        Text("Peace Premium")
                             .font(MMFont.display(30, weight: .bold))
                             .foregroundStyle(.mmTextPrimary)
 

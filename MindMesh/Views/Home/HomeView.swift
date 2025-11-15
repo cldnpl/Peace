@@ -20,19 +20,18 @@ struct HomeView: View {
                 .safeAreaPadding(.horizontal, MMSpacing.md)
                 .safeAreaPadding(.bottom, MMSpacing.sm)
             }
-            .navigationTitle("Buongiorno")
+            .navigationTitle("Home")
             .navigationBarTitleDisplayMode(.large)
         }
     }
 
     private var greetingBlock: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(vm.userName)
+            Text(vm.greetingLine)
                 .font(MMFont.display(26, weight: .bold))
                 .foregroundStyle(.mmTextPrimary)
 
             Text("Qui trovi il punto della giornata e l'andamento recente, senza altro rumore.")
-                .padding(.top)
                 .font(MMFont.body(14))
                 .foregroundStyle(.mmTextMuted)
                 .lineSpacing(3)

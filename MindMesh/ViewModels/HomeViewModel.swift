@@ -3,7 +3,7 @@ import Combine
 
 @MainActor
 final class HomeViewModel: ObservableObject {
-    @Published var userName = "Claudia"
+    @Published var userName = UserDefaults.standard.string(forKey: "peace.userName") ?? ""
     @Published var moodEntries: [MoodEntry] = []
 
     private let store: MoodJournalStore
@@ -38,6 +38,15 @@ final class HomeViewModel: ObservableObject {
         case 12..<18: return "Buon pomeriggio"
         default: return "Buonasera"
         }
+    }
+
+    var displayName: String {
+        let trimmed = userName.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? "tu" : trimmed
+    }
+
+    var greetingLine: String {
+        "\(greeting) \(displayName)"
     }
 
     var dailyTitle: String {

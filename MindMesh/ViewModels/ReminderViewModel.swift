@@ -91,7 +91,7 @@ final class ReminderStore: ObservableObject {
         removeReminder()
 
         let content = UNMutableNotificationContent()
-        content.title = "MindMesh"
+        content.title = "Peace"
         content.body = "Prenditi un momento per segnare come stai oggi."
         content.sound = .default
 
