@@ -68,7 +68,7 @@ struct AIInsightsView: View {
                         .font(MMFont.display(34, weight: .bold))
                         .foregroundStyle(.mmTextPrimary)
 
-                    Image(systemName: "waveform.path.ecg")
+                    Image(systemName: "waveform.path.ecg"
                         .font(.system(size: 18, weight: .semibold))
                         .foregroundStyle(.mmAccent3)
                 }
