@@ -7,12 +7,17 @@ import FoundationModels
 
 struct AIInsightsView: View {
     @StateObject private var vm = AIInsightsViewModel()
+    @EnvironmentObject private var languageStore: AppLanguageStore
     @EnvironmentObject private var premiumStore: PremiumStore
     @State private var showPremiumSheet = false
     @State private var showSupportChat = false
 
     private var premiumAnalysisTaskID: String {
-        "\(premiumStore.hasPremiumAccess)-\(vm.analysisRequestID)"
+        "\(premiumStore.hasPremiumAccess)-\(languageStore.selectedLanguage.rawValue)-\(vm.analysisRequestID(language: languageStore.selectedLanguage))"
+    }
+
+    private var t: AppStrings {
+        AppStrings(language: languageStore.selectedLanguage)
     }
 
     var body: some View {
@@ -36,7 +41,7 @@ struct AIInsightsView: View {
                 .safeAreaPadding(.horizontal, MMSpacing.lg)
                 .safeAreaPadding(.bottom, MMSpacing.md)
             }
-            .navigationTitle("Riflessioni")
+            .navigationTitle(t.insightsTitle)
             .navigationBarTitleDisplayMode(.large)
             .toolbarBackground(.hidden, for: .navigationBar)
             .sheet(isPresented: $showPremiumSheet) {
@@ -46,7 +51,7 @@ struct AIInsightsView: View {
                 AISupportChatView()
             }
             .task(id: premiumAnalysisTaskID) {
-                await vm.loadPremiumAnalysisIfNeeded(hasPremiumAccess: premiumStore.hasPremiumAccess)
+                await vm.loadPremiumAnalysisIfNeeded(hasPremiumAccess: premiumStore.hasPremiumAccess, language: languageStore.selectedLanguage)
             }
         }
     }
@@ -54,7 +59,7 @@ struct AIInsightsView: View {
     private func reflectionCard(snapshot: MoodReflectionSnapshot) -> some View {
         MMCard(borderColor: Color.mmAccent.opacity(0.16), backgroundColor: Color.mmCard.opacity(0.92)) {
             VStack(alignment: .leading, spacing: MMSpacing.lg) {
-                MMSectionLabel(text: "Ultimi 7 giorni")
+                MMSectionLabel(text: t.last7DaysSection)
 
                 Text(snapshot.title)
                     .font(MMFont.display(30, weight: .bold))
@@ -96,16 +101,16 @@ struct AIInsightsView: View {
     private func overviewCard(snapshot: MoodReflectionSnapshot) -> some View {
         MMCard(backgroundColor: Color.mmCard.opacity(0.9)) {
             VStack(alignment: .leading, spacing: MMSpacing.lg) {
-                MMSectionLabel(text: "Panoramica")
+                MMSectionLabel(text: t.overviewSection)
 
                 HStack(spacing: MMSpacing.md) {
-                    StatCard(value: snapshot.dominantMoodLabel, label: "Voce che torna di più", color: .mmAccent)
-                    StatCard(value: snapshot.trendLabel, label: "Andamento recente", color: .mmAccent3)
+                    StatCard(value: snapshot.dominantMoodLabel, label: t.mostRecurringMood, color: .mmAccent)
+                    StatCard(value: snapshot.trendLabel, label: t.recentTrend, color: .mmAccent3)
                 }
 
                 HStack(spacing: MMSpacing.md) {
-                    StatCard(value: snapshot.energyLabel, label: "Energia media", color: .mmTeal)
-                    StatCard(value: snapshot.consistencyLabel, label: "Quanto cambia il tono", color: .mmRose)
+                    StatCard(value: snapshot.energyLabel, label: t.averageEnergy, color: .mmTeal)
+                    StatCard(value: snapshot.consistencyLabel, label: t.toneVariation, color: .mmRose)
                 }
             }
         }
@@ -117,9 +122,9 @@ struct AIInsightsView: View {
             MMCard(borderColor: Color.mmAccent.opacity(0.18), backgroundColor: Color.mmCard.opacity(0.94)) {
                 VStack(alignment: .leading, spacing: MMSpacing.lg) {
                     HStack {
-                        MMSectionLabel(text: "Analisi completa")
+                        MMSectionLabel(text: t.fullAnalysis)
                         Spacer()
-                        MMInlineBadge(title: "Premium", icon: "sparkles", tint: .mmAccent)
+                        MMInlineBadge(title: t.premiumBadge, icon: "sparkles", tint: .mmAccent)
                     }
 
                     if vm.isGeneratingPremiumAnalysis {
@@ -131,14 +136,14 @@ struct AIInsightsView: View {
                     }
 
                     VStack(spacing: 12) {
-                        MMSecondaryButton(title: "Rigenera analisi", icon: "arrow.clockwise", tint: .mmAccent3) {
+                        MMSecondaryButton(title: t.regenerateAnalysis, icon: "arrow.clockwise", tint: .mmAccent3) {
                             Task {
-                                await vm.regeneratePremiumAnalysis()
+                                await vm.regeneratePremiumAnalysis(language: languageStore.selectedLanguage)
                             }
                         }
                         .disabled(!vm.hasEnoughDataForPremiumAnalysis || vm.isGeneratingPremiumAnalysis)
 
-                        MMSecondaryButton(title: "Apri la chat Premium", icon: "bubble.left.and.bubble.right.fill", tint: .mmAccent) {
+                        MMSecondaryButton(title: t.openPremiumChat, icon: "bubble.left.and.bubble.right.fill", tint: .mmAccent) {
                             showSupportChat = true
                         }
                     }
@@ -148,17 +153,17 @@ struct AIInsightsView: View {
             MMCard(borderColor: Color.mmAccent.opacity(0.14), backgroundColor: Color.mmCard.opacity(0.92)) {
                 VStack(alignment: .leading, spacing: MMSpacing.lg) {
                     HStack {
-                        MMSectionLabel(text: "Analisi completa")
+                        MMSectionLabel(text: t.fullAnalysis)
                         Spacer()
                         Image(systemName: "lock.fill")
                             .foregroundStyle(.mmAccent)
                     }
 
-                    Text("La panoramica è pronta. L'analisi completa si sblocca con Premium.")
+                    Text(t.lockedAnalysisTitle)
                         .font(MMFont.title(22, weight: .semibold))
                         .foregroundStyle(.mmTextPrimary)
 
-                    Text("Con Premium puoi ottenere una lettura dettagliatissima generata on-device dal Foundation Model, costruita davvero sulle registrazioni recenti e sulle note che hai scritto.")
+                    Text(t.lockedAnalysisBody)
                         .font(MMFont.body(14))
                         .foregroundStyle(.mmTextMuted)
                         .lineSpacing(4)
@@ -170,18 +175,18 @@ struct AIInsightsView: View {
                         backgroundColor: Color.mmSurface.opacity(0.76)
                     ) {
                         VStack(alignment: .leading, spacing: 8) {
-                            Text("Incluso nel Premium")
+                            Text(t.includedInPremium)
                                 .font(MMFont.caption(12, weight: .semibold))
                                 .foregroundStyle(.mmAccent)
 
-                            Text("Un'analisi premium molto piu profonda dei pattern emotivi recenti, piu una chat di supporto per mettere ordine nei pensieri difficili.")
+                            Text(t.premiumBundleDescription)
                                 .font(MMFont.body(14))
                                 .foregroundStyle(.mmTextPrimary)
                                 .lineSpacing(3)
                         }
                     }
 
-                    MMPrimaryButton(title: "Sblocca l'analisi completa", icon: "sparkles") {
+                    MMPrimaryButton(title: t.unlockFullAnalysis, icon: "sparkles") {
                         showPremiumSheet = true
                     }
                 }
@@ -200,11 +205,11 @@ struct AIInsightsView: View {
                 ProgressView()
                     .tint(.mmAccent)
 
-                Text("Sto preparando una lettura premium molto piu profonda dei tuoi check-in recenti.")
+                Text(t.premiumLoadingTitle)
                     .font(MMFont.title(18, weight: .semibold))
                     .foregroundStyle(.mmTextPrimary)
 
-                Text("L'analisi usa Apple Foundation Model e tiene conto del ritmo, delle note testuali, dei cambi di tono e dei segnali da monitorare.")
+                Text(t.premiumLoadingBody)
                     .font(MMFont.body(14))
                     .foregroundStyle(.mmTextMuted)
                     .lineSpacing(3)
@@ -219,7 +224,7 @@ struct AIInsightsView: View {
                     .font(MMFont.title(24, weight: .semibold))
                     .foregroundStyle(.mmTextPrimary)
 
-                Text("Generata il \(premiumAnalysis.generatedAt.formatted(date: .abbreviated, time: .shortened)) · Apple Foundation Model")
+                Text(t.premiumGeneratedAt(premiumAnalysis.generatedAt.formatted(date: .abbreviated, time: .shortened)))
                     .font(MMFont.caption(12, weight: .medium))
                     .foregroundStyle(.mmTextDim)
             }
@@ -247,7 +252,7 @@ struct AIInsightsView: View {
             backgroundColor: Color.mmRose.opacity(0.08)
         ) {
             VStack(alignment: .leading, spacing: 10) {
-                Text("Analisi premium non disponibile")
+                Text(t.premiumAnalysisUnavailable)
                     .font(MMFont.title(18, weight: .semibold))
                     .foregroundStyle(.mmTextPrimary)
 
@@ -271,11 +276,11 @@ struct AIInsightsView: View {
                             .foregroundStyle(.mmAccent)
                     )
 
-                Text("Non ho ancora abbastanza dati per una riflessione approfondita.")
+                Text(t.notEnoughDataTitle)
                     .font(MMFont.display(28, weight: .bold))
                     .foregroundStyle(.mmTextPrimary)
 
-                Text("Registra piu spesso il tuo umore nei prossimi giorni. Quando ci saranno almeno 3 registrazioni recenti, qui comparira una panoramica reale dell'andamento.")
+                Text(t.notEnoughDataBody)
                     .font(MMFont.body(15))
                     .foregroundStyle(.mmTextMuted)
                     .lineSpacing(4)
@@ -288,6 +293,7 @@ struct AIInsightsView_Previews: PreviewProvider {
     static var previews: some View {
         AIInsightsView()
             .environmentObject(PremiumStore(storeKitEnabled: false, initialPremiumAccess: true))
+            .environmentObject(AppLanguageStore(initialLanguage: .italian))
     }
 }
 
@@ -314,8 +320,8 @@ final class AIInsightsViewModel: ObservableObject {
         self.store = .shared
         self.analysisService = PremiumEmotionalAnalysisService()
         self.cacheStore = .shared
-        self.snapshot = store.reflectionSnapshot()
-        self.premiumAnalysis = cacheStore.analysis(for: analysisRequestID)
+        self.snapshot = store.reflectionSnapshot(language: AppLanguagePreferences.currentLanguage)
+        self.premiumAnalysis = cacheStore.analysis(for: analysisRequestID(language: AppLanguagePreferences.currentLanguage))
 
         store.$entries
             .receive(on: RunLoop.main)
@@ -325,24 +331,27 @@ final class AIInsightsViewModel: ObservableObject {
             .store(in: &cancellables)
     }
 
-    var analysisRequestID: String {
-        premiumAnalysisSignature() ?? "no-premium-analysis-data"
+    func analysisRequestID(language: AppLanguage) -> String {
+        premiumAnalysisSignature(language: language) ?? "no-premium-analysis-data-\(language.rawValue)"
     }
 
     var hasEnoughDataForPremiumAnalysis: Bool {
         premiumAnalysisEntries.count >= 3
     }
 
-    func loadPremiumAnalysisIfNeeded(hasPremiumAccess: Bool) async {
+    func loadPremiumAnalysisIfNeeded(hasPremiumAccess: Bool, language: AppLanguage) async {
+        let t = AppStrings(language: language)
+        snapshot = store.reflectionSnapshot(language: language)
+
         guard hasPremiumAccess else {
             premiumAnalysis = nil
             premiumAnalysisError = nil
             return
         }
 
-        guard let signature = premiumAnalysisSignature() else {
+        guard let signature = premiumAnalysisSignature(language: language) else {
             premiumAnalysis = nil
-            premiumAnalysisError = "Servono almeno 3 registrazioni recenti per costruire un'analisi premium davvero utile."
+            premiumAnalysisError = t.text(it: "Servono almeno 3 registrazioni recenti per costruire un'analisi premium davvero utile.", en: "You need at least 3 recent entries to build a truly useful premium analysis.", es: "Necesitas al menos 3 registros recientes para construir un análisis premium realmente útil.", fr: "Il faut au moins 3 entrées récentes pour construire une analyse premium vraiment utile.", zh: "至少需要 3 条最近记录，才能生成真正有用的 Premium 分析。", ar: "أنت بحاجة إلى 3 تسجيلات حديثة على الأقل لبناء تحليل Premium مفيد فعلاً.", da: "Du skal have mindst 3 nylige registreringer for at bygge en virkelig nyttig premium-analyse.", nb: "Du trenger minst 3 nylige registreringer for å bygge en virkelig nyttig premium-analyse.", sv: "Du behöver minst 3 senaste registreringar för att skapa en verkligt användbar premiumanalys.")
             return
         }
 
@@ -352,11 +361,11 @@ final class AIInsightsViewModel: ObservableObject {
             return
         }
 
-        await generatePremiumAnalysis(forceRefresh: false)
+        await generatePremiumAnalysis(forceRefresh: false, language: language)
     }
 
-    func regeneratePremiumAnalysis() async {
-        await generatePremiumAnalysis(forceRefresh: true)
+    func regeneratePremiumAnalysis(language: AppLanguage) async {
+        await generatePremiumAnalysis(forceRefresh: true, language: language)
     }
 
     private var premiumAnalysisEntries: [MoodEntry] {
@@ -364,28 +373,29 @@ final class AIInsightsViewModel: ObservableObject {
     }
 
     private func handleEntriesUpdated() {
-        snapshot = store.reflectionSnapshot()
+        snapshot = store.reflectionSnapshot(language: AppLanguagePreferences.currentLanguage)
         premiumAnalysisError = nil
-        premiumAnalysis = cacheStore.analysis(for: analysisRequestID)
+        premiumAnalysis = cacheStore.analysis(for: analysisRequestID(language: AppLanguagePreferences.currentLanguage))
     }
 
-    private func premiumAnalysisSignature() -> String? {
+    private func premiumAnalysisSignature(language: AppLanguage) -> String? {
         let entries = premiumAnalysisEntries
         guard entries.count >= 3 else { return nil }
 
-        let rawValue = entries.map { entry in
+        let rawValue = ([language.rawValue] + entries.map { entry in
             let note = entry.note.trimmingCharacters(in: .whitespacesAndNewlines)
             return "\(entry.id.uuidString)|\(entry.date.timeIntervalSince1970)|\(entry.mood.rawValue)|\(note)"
-        }.joined(separator: "||")
+        }).joined(separator: "||")
 
         let digest = SHA256.hash(data: Data(rawValue.utf8))
         return digest.compactMap { String(format: "%02x", $0) }.joined()
     }
 
-    private func generatePremiumAnalysis(forceRefresh: Bool) async {
-        guard let snapshot, let signature = premiumAnalysisSignature() else {
+    private func generatePremiumAnalysis(forceRefresh: Bool, language: AppLanguage) async {
+        let t = AppStrings(language: language)
+        guard let snapshot, let signature = premiumAnalysisSignature(language: language) else {
             premiumAnalysis = nil
-            premiumAnalysisError = "Servono almeno 3 registrazioni recenti per costruire un'analisi premium davvero utile."
+            premiumAnalysisError = t.text(it: "Servono almeno 3 registrazioni recenti per costruire un'analisi premium davvero utile.", en: "You need at least 3 recent entries to build a truly useful premium analysis.", es: "Necesitas al menos 3 registros recientes para construir un análisis premium realmente útil.", fr: "Il faut au moins 3 entrées récentes pour construire une analyse premium vraiment utile.", zh: "至少需要 3 条最近记录，才能生成真正有用的 Premium 分析。", ar: "أنت بحاجة إلى 3 تسجيلات حديثة على الأقل لبناء تحليل Premium مفيد فعلاً.", da: "Du skal have mindst 3 nylige registreringer for at bygge en virkelig nyttig premium-analyse.", nb: "Du trenger minst 3 nylige registreringer for å bygge en virkelig nyttig premium-analyse.", sv: "Du behöver minst 3 senaste registreringar för att skapa en verkligt användbar premiumanalys.")
             return
         }
 
@@ -403,6 +413,7 @@ final class AIInsightsViewModel: ObservableObject {
             let analysis = try await analysisService.generateAnalysis(
                 entries: premiumAnalysisEntries,
                 snapshot: snapshot,
+                language: language,
                 signature: signature
             )
             premiumAnalysis = analysis
@@ -412,7 +423,7 @@ final class AIInsightsViewModel: ObservableObject {
             premiumAnalysisError = error.userMessage
         } catch {
             premiumAnalysis = nil
-            premiumAnalysisError = "Non riesco a generare l'analisi premium in questo momento."
+            premiumAnalysisError = t.text(it: "Non riesco a generare l'analisi premium in questo momento.", en: "I can't generate the premium analysis right now.", es: "No puedo generar el análisis premium en este momento.", fr: "Je ne peux pas générer l'analyse premium pour le moment.", zh: "目前无法生成 Premium 分析。", ar: "لا يمكنني إنشاء تحليل Premium الآن.", da: "Jeg kan ikke generere premium-analysen lige nu.", nb: "Jeg kan ikke generere premium-analysen akkurat nå.", sv: "Jag kan inte generera premiumanalysen just nu.")
         }
     }
 }
@@ -423,85 +434,89 @@ private enum PremiumEmotionalAnalysisError: Error {
     case generationFailed
 
     var userMessage: String {
+        let t = AppStrings.current
         switch self {
         case .foundationUnavailable(let detail):
             return detail
         case .emptyResponse:
-            return "Il Foundation Model non ha restituito un contenuto utile. Riprova tra poco."
+            return t.text(it: "Il Foundation Model non ha restituito un contenuto utile. Riprova tra poco.", en: "The Foundation Model didn't return useful content. Try again soon.", es: "El Foundation Model no devolvió contenido útil. Vuelve a intentarlo en breve.", fr: "Le Foundation Model n'a pas renvoyé de contenu utile. Réessaie bientôt.", zh: "Foundation Model 没有返回有效内容，请稍后再试。", ar: "لم يُرجع Foundation Model محتوى مفيداً. حاول مرة أخرى بعد قليل.", da: "Foundation Model returnerede ikke nyttigt indhold. Prøv igen om lidt.", nb: "Foundation Model returnerte ikke nyttig innhold. Prøv igjen om litt.", sv: "Foundation Model returnerade inget användbart innehåll. Försök igen snart.")
         case .generationFailed:
-            return "La generazione dell'analisi premium non e andata a buon fine."
+            return t.text(it: "La generazione dell'analisi premium non e andata a buon fine.", en: "The premium analysis generation didn't complete successfully.", es: "La generación del análisis premium no se completó correctamente.", fr: "La génération de l'analyse premium n'a pas abouti.", zh: "Premium 分析生成未成功完成。", ar: "لم يكتمل توليد تحليل Premium بنجاح.", da: "Genereringen af premium-analysen blev ikke fuldført.", nb: "Genereringen av premium-analysen ble ikke fullført.", sv: "Genereringen av premiumanalysen slutfördes inte.")
         }
     }
 }
 
 private struct PremiumEmotionalAnalysisPromptBuilder {
-    static let instructions = """
-    Sei un analista emotivo premium per un'app di journaling. Devi scrivere in italiano una lettura molto approfondita, nitida, concreta e altamente personalizzata dei check-in recenti.
-    Regole:
-    - usa solo i dati disponibili, senza inventare nulla;
-    - non fare diagnosi cliniche;
-    - evidenzia pattern, svolte, contrasti, trigger possibili e fattori che sembrano aiutare;
-    - analizza con molta attenzione le note testuali, se presenti;
-    - sii dettagliato: il tono deve giustificare chiaramente un piano premium;
-    - evita frasi vaghe o generiche;
-    - mantieni una cautela interpretativa: parla di ipotesi, segnali e letture plausibili, non di certezze assolute;
-    - chiudi sempre con tre azioni pratiche, specifiche e realistiche.
+    static func instructions(language: AppLanguage) -> String {
+        """
+        You are a premium emotional analyst for a journaling app. Write entirely in \(language.aiLanguageName).
+        Produce a very detailed, sharp, concrete, and highly personalized reading of the user's recent check-ins.
+        Rules:
+        - use only the available data and never invent facts;
+        - do not make clinical diagnoses;
+        - highlight patterns, turning points, contrasts, possible triggers, and factors that seem to help;
+        - analyze text notes very carefully when present;
+        - be detailed enough to clearly justify the value of a premium plan;
+        - avoid vague or generic phrasing;
+        - stay interpretive but cautious: speak in terms of hypotheses, signals, and plausible readings, not certainties;
+        - always end with three practical, specific, realistic actions.
 
-    Formato obbligatorio:
-    Titolo: [una riga breve, intensa e specifica]
+        Required format:
+        Title: [one short, sharp, specific line]
 
-    Quadro generale
-    [paragrafo denso]
+        General picture
+        [dense paragraph]
 
-    Pattern ricorrenti
-    [paragrafo denso]
+        Recurring patterns
+        [dense paragraph]
 
-    Lettura delle note
-    [paragrafo denso]
+        Reading of the notes
+        [dense paragraph]
 
-    Segnali di miglioramento e segnali di attrito
-    [paragrafo denso]
+        Signals of improvement and signals of friction
+        [dense paragraph]
 
-    Ipotesi interpretative
-    [paragrafo denso]
+        Interpretive hypotheses
+        [dense paragraph]
 
-    Cosa monitorare adesso
-    [paragrafo denso]
+        What to monitor now
+        [dense paragraph]
 
-    Tre azioni pratiche
-    1. ...
-    2. ...
-    3. ...
+        Three practical actions
+        1. ...
+        2. ...
+        3. ...
 
-    La risposta deve essere sostanziosa e da premium, non breve.
-    """
+        The response must feel substantial and premium, not brief.
+        """
+    }
 
-    static func prompt(entries: [MoodEntry], snapshot: MoodReflectionSnapshot) -> String {
+    static func prompt(entries: [MoodEntry], snapshot: MoodReflectionSnapshot, language: AppLanguage) -> String {
         let formattedEntries = entries.map { entry in
             let note = entry.note.trimmingCharacters(in: .whitespacesAndNewlines)
-            let noteSummary = note.isEmpty ? "nessuna nota" : note
+            let noteSummary = note.isEmpty ? "no note" : note
             return """
-            - data: \(entry.date.formatted(date: .abbreviated, time: .omitted))
-              umore: \(entry.mood.label)
-              dettaglio umore: \(entry.mood.detail)
-              energia stimata: \(entry.mood.energyValue)
-              nota: \(noteSummary)
+            - date: \(entry.date.formatted(date: .abbreviated, time: .omitted))
+              mood: \(entry.mood.label(in: language))
+              mood detail: \(entry.mood.detail(in: language))
+              estimated energy: \(entry.mood.energyValue)
+              note: \(noteSummary)
             """
         }.joined(separator: "\n")
 
         return """
-        Sintesi quantitativa gia osservata dall'app:
-        - titolo riassuntivo: \(snapshot.title)
-        - messaggio generale: \(snapshot.message)
-        - andamento recente: \(snapshot.trendLabel)
-        - energia media: \(snapshot.energyLabel)
-        - consistenza: \(snapshot.consistencyLabel)
-        - voce dominante: \(snapshot.dominantMoodLabel)
+        Quantitative summary already observed by the app:
+        - summary title: \(snapshot.title)
+        - general message: \(snapshot.message)
+        - recent trend: \(snapshot.trendLabel)
+        - average energy: \(snapshot.energyLabel)
+        - consistency: \(snapshot.consistencyLabel)
+        - dominant mood: \(snapshot.dominantMoodLabel)
 
-        Registrazioni recenti da analizzare:
+        Recent entries to analyze:
         \(formattedEntries)
 
-        Costruisci una lettura premium veramente approfondita di questi dati.
+        Build a genuinely deep premium analysis of these data in \(language.aiLanguageName).
         """
     }
 
@@ -510,9 +525,9 @@ private struct PremiumEmotionalAnalysisPromptBuilder {
         let lines = trimmed.components(separatedBy: .newlines)
         let firstNonEmptyLine = lines.first { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty } ?? ""
 
-        if firstNonEmptyLine.lowercased().hasPrefix("titolo:") {
+        if firstNonEmptyLine.lowercased().hasPrefix("title:") {
             let title = firstNonEmptyLine
-                .dropFirst("Titolo:".count)
+                .dropFirst("Title:".count)
                 .trimmingCharacters(in: .whitespacesAndNewlines)
 
             let content = lines.dropFirst()
@@ -521,7 +536,7 @@ private struct PremiumEmotionalAnalysisPromptBuilder {
 
             return PremiumEmotionalAnalysis(
                 signature: signature,
-                title: title.isEmpty ? "Analisi emotiva premium" : title,
+                title: title.isEmpty ? AppStrings.current.premiumAnalysisTitleFallback : title,
                 content: content,
                 generatedAt: .now
             )
@@ -529,7 +544,7 @@ private struct PremiumEmotionalAnalysisPromptBuilder {
 
         return PremiumEmotionalAnalysis(
             signature: signature,
-            title: "Analisi emotiva premium",
+            title: AppStrings.current.premiumAnalysisTitleFallback,
             content: trimmed,
             generatedAt: .now
         )
@@ -540,12 +555,13 @@ private final class PremiumEmotionalAnalysisService {
     func generateAnalysis(
         entries: [MoodEntry],
         snapshot: MoodReflectionSnapshot,
+        language: AppLanguage,
         signature: String
     ) async throws -> PremiumEmotionalAnalysis {
         #if canImport(FoundationModels)
         guard #available(iOS 26.0, *) else {
             throw PremiumEmotionalAnalysisError.foundationUnavailable(
-                "Questa analisi premium richiede Apple Foundation Model e non e disponibile sulla versione iOS attuale."
+                AppStrings(language: language).text(it: "Questa analisi premium richiede Apple Foundation Model e non e disponibile sulla versione iOS attuale.", en: "This premium analysis requires Apple Foundation Model and isn't available on the current iOS version.", es: "Este análisis premium requiere Apple Foundation Model y no está disponible en la versión actual de iOS.", fr: "Cette analyse premium nécessite Apple Foundation Model et n'est pas disponible sur la version iOS actuelle.", zh: "此 Premium 分析需要 Apple Foundation Model，当前 iOS 版本不可用。", ar: "يتطلب هذا التحليل المميز Apple Foundation Model وهو غير متاح على إصدار iOS الحالي.", da: "Denne premium-analyse kræver Apple Foundation Model og er ikke tilgængelig på den nuværende iOS-version.", nb: "Denne premium-analysen krever Apple Foundation Model og er ikke tilgjengelig på den nåværende iOS-versjonen.", sv: "Den här premiumanalysen kräver Apple Foundation Model och är inte tillgänglig på den nuvarande iOS-versionen.")
             )
         }
 
@@ -555,16 +571,16 @@ private final class PremiumEmotionalAnalysisService {
             break
         case .unavailable(let reason):
             throw PremiumEmotionalAnalysisError.foundationUnavailable(
-                "Apple Intelligence non e disponibile su questo dispositivo: \(String(describing: reason))."
+                AppStrings(language: language).text(it: "Apple Intelligence non e disponibile su questo dispositivo: \(String(describing: reason)).", en: "Apple Intelligence isn't available on this device: \(String(describing: reason)).", es: "Apple Intelligence no está disponible en este dispositivo: \(String(describing: reason)).", fr: "Apple Intelligence n'est pas disponible sur cet appareil : \(String(describing: reason)).", zh: "此设备不支持 Apple Intelligence：\(String(describing: reason)).", ar: "Apple Intelligence غير متاح على هذا الجهاز: \(String(describing: reason)).", da: "Apple Intelligence er ikke tilgængelig på denne enhed: \(String(describing: reason)).", nb: "Apple Intelligence er ikke tilgjengelig på denne enheten: \(String(describing: reason)).", sv: "Apple Intelligence är inte tillgängligt på den här enheten: \(String(describing: reason)).")
             )
         }
 
         let session = LanguageModelSession(
             model: model,
-            instructions: PremiumEmotionalAnalysisPromptBuilder.instructions
+            instructions: PremiumEmotionalAnalysisPromptBuilder.instructions(language: language)
         )
         let response = try await session.respond(
-            to: PremiumEmotionalAnalysisPromptBuilder.prompt(entries: entries, snapshot: snapshot)
+            to: PremiumEmotionalAnalysisPromptBuilder.prompt(entries: entries, snapshot: snapshot, language: language)
         )
         let content = response.content.trimmingCharacters(in: .whitespacesAndNewlines)
 
@@ -575,7 +591,7 @@ private final class PremiumEmotionalAnalysisService {
         return PremiumEmotionalAnalysisPromptBuilder.parse(content, signature: signature)
         #else
         throw PremiumEmotionalAnalysisError.foundationUnavailable(
-            "Il framework FoundationModels non e disponibile in questa build."
+            AppStrings(language: language).text(it: "Il framework FoundationModels non e disponibile in questa build.", en: "The FoundationModels framework isn't available in this build.", es: "El framework FoundationModels no está disponible en esta compilación.", fr: "Le framework FoundationModels n'est pas disponible dans cette build.", zh: "此构建中不包含 FoundationModels 框架。", ar: "إطار FoundationModels غير متاح في هذه البنية.", da: "FoundationModels-frameworket er ikke tilgængeligt i dette build.", nb: "FoundationModels-rammeverket er ikke tilgjengelig i denne byggen.", sv: "FoundationModels-ramverket är inte tillgängligt i den här builden.")
         )
         #endif
     }

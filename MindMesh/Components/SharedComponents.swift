@@ -62,7 +62,7 @@ struct MMInlineBadge: View {
 
 struct AIBadge: View {
     var body: some View {
-        MMInlineBadge(title: "Assistita", icon: "sparkles", tint: .mmAccent)
+        MMInlineBadge(title: AppStrings.current.aiAssisted, icon: "sparkles", tint: .mmAccent)
     }
 }
 
@@ -125,7 +125,7 @@ struct MMScoreBar: View {
             .frame(height: 6)
 
             HStack {
-                Text("Quanto pesa")
+                Text(AppStrings.current.howStrong)
                     .font(MMFont.caption(10, weight: .medium))
                     .foregroundStyle(.mmTextDim)
 
@@ -338,7 +338,7 @@ private struct MMToolbarAvatarButton: View {
                 )
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("Apri profilo")
+        .accessibilityLabel(AppStrings.current.openProfile)
     }
 }
 

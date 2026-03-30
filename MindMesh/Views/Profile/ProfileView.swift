@@ -4,6 +4,7 @@ struct SettingsView: View {
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = true
     @AppStorage("darkModeEnabled") private var darkModeOn = false
     @AppStorage("peace.userName") private var storedUserName = ""
+    @EnvironmentObject private var languageStore: AppLanguageStore
     @EnvironmentObject private var premiumStore: PremiumStore
     @ObservedObject private var reminderStore = ReminderStore.shared
     @State private var showPremiumSheet = false
@@ -11,17 +12,21 @@ struct SettingsView: View {
 
     private let version = "1.0.0"
 
+    private var t: AppStrings {
+        AppStrings(language: languageStore.selectedLanguage)
+    }
+
     var body: some View {
         NavigationStack {
             ZStack {
                 AmbientBackground()
 
                 List {
-                    Section("App") {
-                        Toggle("Tema scuro", isOn: $darkModeOn)
+                    Section(t.settingsAppSection) {
+                        Toggle(t.darkTheme, isOn: $darkModeOn)
                             .tint(.mmAccent)
 
-                        Toggle("Promemoria giornaliero", isOn: Binding(
+                        Toggle(t.dailyReminder, isOn: Binding(
                             get: { reminderStore.isEnabled },
                             set: { reminderStore.setEnabled($0) }
                         ))
@@ -29,7 +34,7 @@ struct SettingsView: View {
 
                         if reminderStore.isEnabled {
                             DatePicker(
-                                "Orario",
+                                t.reminderTime,
                                 selection: Binding(
                                     get: { reminderStore.reminderTime },
                                     set: { reminderStore.updateReminderTime($0) }
@@ -38,28 +43,36 @@ struct SettingsView: View {
                             )
                         }
 
-                        Text(reminderStore.statusText)
-                            .font(MMFont.body(13))
-                            .foregroundStyle(.mmTextMuted)
-
                         Button {
                             showPremiumSheet = true
                         } label: {
                             Label(
-                                premiumStore.hasPremiumAccess ? "Gestisci Peace Premium" : "Peace Premium",
+                                premiumStore.hasPremiumAccess ? t.managePremium : t.premiumTitle,
                                 systemImage: premiumStore.hasPremiumAccess ? "checkmark.circle.fill" : "sparkles"
                             )
                         }
                         .foregroundStyle(.mmTextPrimary)
                     }
 
-                    Section("Info") {
-                        LabeledContent("Versione", value: version)
+                    Section(t.settingsLanguageSection) {
+                        Picker(t.settingsAppLanguage, selection: $languageStore.selectedLanguage) {
+                            ForEach(AppLanguage.allCases) { language in
+                                Text(language.displayName).tag(language)
+                            }
+                        }
+
+                        Text(t.settingsLanguageFootnote)
+                            .font(MMFont.body(13))
+                            .foregroundStyle(.mmTextMuted)
+                    }
+
+                    Section(t.infoSection) {
+                        LabeledContent(t.versionLabel, value: version)
 
                     }
 
                     Section {
-                        Button("Esci dal profilo", role: .destructive) {
+                        Button(t.signOut, role: .destructive) {
                             storedUserName = ""
                             hasSeenOnboarding = false
                         }
@@ -69,7 +82,7 @@ struct SettingsView: View {
                 .scrollContentBackground(.hidden)
                 .background(Color.clear)
             }
-            .navigationTitle("Impostazioni")
+            .navigationTitle(t.settingsTitle)
             .navigationBarTitleDisplayMode(.large)
             .toolbarBackground(.hidden, for: .navigationBar)
             .onAppear {
@@ -85,7 +98,7 @@ struct SettingsView: View {
                             .foregroundStyle(.mmAccent)
                     }
                     .buttonStyle(.plain)
-                    .accessibilityLabel("Apri profilo")
+                    .accessibilityLabel(t.openProfile)
                 }
             }
             .sheet(isPresented: $showProfile) {
@@ -100,6 +113,7 @@ struct SettingsView: View {
 
 struct ProfileView: View {
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var languageStore: AppLanguageStore
     @EnvironmentObject private var premiumStore: PremiumStore
     @AppStorage("peace.userName") private var storedUserName = ""
     @ObservedObject private var moodStore = MoodJournalStore.shared
@@ -113,11 +127,15 @@ struct ProfileView: View {
 
     private var displayName: String {
         let trimmed = storedUserName.trimmingCharacters(in: .whitespacesAndNewlines)
-        return trimmed.isEmpty ? "Tu" : trimmed
+        return trimmed.isEmpty ? t.you : trimmed
     }
 
     private var planLabel: String {
-        premiumStore.hasPremiumAccess ? "Peace Premium" : "Piano base"
+        premiumStore.hasPremiumAccess ? t.premiumTitle : t.basicPlan
+    }
+
+    private var t: AppStrings {
+        AppStrings(language: languageStore.selectedLanguage)
     }
 
     var body: some View {
@@ -130,12 +148,12 @@ struct ProfileView: View {
                         profileHeader
 
                         HStack(spacing: MMSpacing.md) {
-                            StatCard(value: "\(moodStore.entries.count)", label: "Check-in salvati", color: .mmAccent)
-                            StatCard(value: "\(recentCheckinsCount)", label: "Check-in ultimi 7 giorni", color: .mmAccent3)
+                            StatCard(value: "\(moodStore.entries.count)", label: t.savedCheckins, color: .mmAccent)
+                            StatCard(value: "\(recentCheckinsCount)", label: t.checkinsLast7Days, color: .mmAccent3)
                         }
 
                         MMPrimaryButton(
-                            title: premiumStore.hasPremiumAccess ? "Premium attivo" : "Scopri Premium",
+                            title: premiumStore.hasPremiumAccess ? t.premiumActive : t.discoverPremium,
                             icon: premiumStore.hasPremiumAccess ? "checkmark.circle.fill" : "sparkles",
                             gradient: .mmRoseGradient,
                             glowColor: .mmRose
@@ -148,12 +166,12 @@ struct ProfileView: View {
                 .safeAreaPadding(.horizontal, MMSpacing.lg)
                 .safeAreaPadding(.bottom, MMSpacing.md)
             }
-            .navigationTitle("Profilo")
+            .navigationTitle(t.profileTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.hidden, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Chiudi") {
+                    Button(t.close) {
                         dismiss()
                     }
                 }
@@ -190,7 +208,7 @@ struct ProfileView: View {
                     Spacer()
                 }
 
-                Text("Qui trovi il tuo spazio personale, con un riepilogo semplice di quello che stai usando davvero.")
+                Text(t.profileSummary)
                     .font(MMFont.body(14))
                     .foregroundStyle(.mmTextMuted)
                     .lineSpacing(4)
@@ -201,14 +219,21 @@ struct ProfileView: View {
 
 struct PremiumSheet: View {
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var languageStore: AppLanguageStore
     @EnvironmentObject private var premiumStore: PremiumStore
 
-    private let features = [
-        ("sparkles", "Riflessioni più profonde", "Spunti meno generici e più mirati."),
-        ("bubble.left.and.bubble.right", "Chat emotiva guidata", "Uno spazio premium per elaborare i momenti piu difficili."),
-        ("clock.arrow.trianglehead.counterclockwise.rotate.90", "Cronologia chat recenti", "Riprendi le conversazioni premium senza perderne il filo."),
-        ("icloud", "Sync tra dispositivi", "Apri il tuo spazio ovunque, senza ricominciare.")
-    ]
+    private var t: AppStrings {
+        AppStrings(language: languageStore.selectedLanguage)
+    }
+
+    private var features: [(String, String, String)] {
+        [
+            ("sparkles", t.premiumFeatureInsightsTitle, t.premiumFeatureInsightsBody),
+            ("bubble.left.and.bubble.right", t.premiumFeatureChatTitle, t.premiumFeatureChatBody),
+            ("clock.arrow.trianglehead.counterclockwise.rotate.90", t.premiumFeatureHistoryTitle, t.premiumFeatureHistoryBody),
+            ("icloud", t.premiumFeatureSyncTitle, t.premiumFeatureSyncBody)
+        ]
+    }
 
     var body: some View {
         ZStack {
@@ -226,11 +251,11 @@ struct PremiumSheet: View {
                                     .foregroundStyle(.mmAccent)
                             )
 
-                        Text("Peace Premium")
+                        Text(t.premiumTitle)
                             .font(MMFont.display(30, weight: .bold))
                             .foregroundStyle(.mmTextPrimary)
 
-                        Text("Per chi vuole più continuità e più profondità, senza complicare il resto.")
+                        Text(t.premiumHeroSubtitle)
                             .font(MMFont.body(15))
                             .foregroundStyle(.mmTextMuted)
                             .multilineTextAlignment(.center)
@@ -317,7 +342,7 @@ struct PremiumSheet: View {
                         .disabled(premiumStore.hasPremiumAccess || premiumStore.isPurchasing || premiumStore.isLoadingProducts)
                         .opacity((premiumStore.hasPremiumAccess || premiumStore.isPurchasing) ? 0.7 : 1)
 
-                        MMSecondaryButton(title: "Ripristina acquisti", icon: "arrow.clockwise.circle", tint: .mmAccent3) {
+                        MMSecondaryButton(title: t.restorePurchases, icon: "arrow.clockwise.circle", tint: .mmAccent3) {
                             Task {
                                 await premiumStore.restorePurchases()
                                 if premiumStore.hasPremiumAccess {
@@ -344,14 +369,17 @@ struct SettingsView_Previews: PreviewProvider {
             SettingsView()
                 .previewDisplayName("Impostazioni")
                 .environmentObject(PremiumStore(storeKitEnabled: false, initialPremiumAccess: false))
+                .environmentObject(AppLanguageStore(initialLanguage: .italian))
 
             ProfileView()
                 .previewDisplayName("Profilo")
                 .environmentObject(PremiumStore(storeKitEnabled: false, initialPremiumAccess: true))
+                .environmentObject(AppLanguageStore(initialLanguage: .italian))
 
             PremiumSheet()
                 .previewDisplayName("Premium")
                 .environmentObject(PremiumStore(storeKitEnabled: false, initialPremiumAccess: false))
+                .environmentObject(AppLanguageStore(initialLanguage: .italian))
         }
     }
 }

@@ -2,16 +2,23 @@ import SwiftUI
 
 struct OnboardingView: View {
     @Binding var hasSeenOnboarding: Bool
+    @EnvironmentObject private var languageStore: AppLanguageStore
     @AppStorage("peace.userName") private var storedUserName = ""
     @State private var orb = false
     @State private var appear = false
     @State private var draftName = ""
 
-    private let features = [
-        ("text.alignleft", "Sintesi chiare", "Trovi subito il punto della giornata senza schermate inutili."),
-        ("heart.text.square.fill", "Umore leggibile", "Tieni traccia di come stai con un gesto semplice."),
-        ("sparkles", "Riflessioni utili", "Ricevi spunti corti, concreti e facili da usare.")
-    ]
+    private var t: AppStrings {
+        AppStrings(language: languageStore.selectedLanguage)
+    }
+
+    private var features: [(String, String, String)] {
+        [
+            ("text.alignleft", t.onboardingFeatureSummaryTitle, t.onboardingFeatureSummaryBody),
+            ("heart.text.square.fill", t.onboardingFeatureMoodTitle, t.onboardingFeatureMoodBody),
+            ("sparkles", t.onboardingFeatureInsightsTitle, t.onboardingFeatureInsightsBody)
+        ]
+    }
 
     var body: some View {
         ZStack {
@@ -74,12 +81,12 @@ struct OnboardingView: View {
 
     private var intro: some View {
         VStack(spacing: 14) {
-            Text("Benvenuto/a in Peace.")
+            Text(t.onboardingWelcomeTitle)
                 .font(.system(size: 38, weight: .bold, design: .serif))
                 .foregroundStyle(.mmTextPrimary)
                 .multilineTextAlignment(.center)
 
-            Text("Un posto semplice per capire come stai, con calma. Prima di iniziare, dimmi solo come vuoi essere chiamato/a.")
+            Text(t.onboardingWelcomeBody)
                 .font(.system(size: 16, weight: .regular))
                 .foregroundStyle(.mmTextMuted)
                 .multilineTextAlignment(.center)
@@ -126,9 +133,9 @@ struct OnboardingView: View {
     private var actions: some View {
         VStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 10) {
-                MMSectionLabel(text: "Il tuo nome")
+                MMSectionLabel(text: t.onboardingYourName)
 
-                TextField("Come ti chiami?", text: $draftName)
+                TextField(t.onboardingNamePlaceholder, text: $draftName)
                     .font(MMFont.body(16))
                     .foregroundStyle(.mmTextPrimary)
                     .textInputAutocapitalization(.words)
@@ -145,7 +152,7 @@ struct OnboardingView: View {
                     )
             }
 
-            MMPrimaryButton(title: "Continua", icon: "arrow.right") {
+            MMPrimaryButton(title: t.continueButton, icon: "arrow.right") {
                 storedUserName = normalizedName
                 withAnimation(.spring(response: 0.4, dampingFraction: 0.86)) {
                     hasSeenOnboarding = true
@@ -165,5 +172,6 @@ struct OnboardingView: View {
 struct OnboardingView_Previews: PreviewProvider {
     static var previews: some View {
         OnboardingView(hasSeenOnboarding: .constant(false))
+            .environmentObject(AppLanguageStore(initialLanguage: .italian))
     }
 }

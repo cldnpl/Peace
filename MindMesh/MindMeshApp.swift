@@ -6,6 +6,7 @@ struct PeaceApp: App {
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
     @AppStorage("darkModeEnabled") private var darkModeEnabled = false
     @StateObject private var premiumStore = PremiumStore()
+    @StateObject private var languageStore = AppLanguageStore()
 
     init() {
         configureBarAppearance()
@@ -21,7 +22,9 @@ struct PeaceApp: App {
                 }
             }
             .preferredColorScheme(darkModeEnabled ? .dark : .light)
+            .environment(\.locale, languageStore.selectedLanguage.locale)
             .environmentObject(premiumStore)
+            .environmentObject(languageStore)
         }
     }
 

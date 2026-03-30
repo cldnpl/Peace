@@ -25,6 +25,7 @@
 		AB0000000000000000000035 /* AISupportChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000036 /* AISupportChatView.swift */; };
 		AB0000000000000000000037 /* AISupportChatService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000038 /* AISupportChatService.swift */; };
 		AB0000000000000000000039 /* PremiumStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000040 /* PremiumStore.swift */; };
+		AB0000000000000000000042 /* AppLanguage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000041 /* AppLanguage.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -47,6 +48,7 @@
 		AB0000000000000000000036 /* AISupportChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AISupportChatView.swift; sourceTree = "<group>"; };
 		AB0000000000000000000038 /* AISupportChatService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AISupportChatService.swift; sourceTree = "<group>"; };
 		AB0000000000000000000040 /* PremiumStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PremiumStore.swift; sourceTree = "<group>"; };
+		AB0000000000000000000041 /* AppLanguage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLanguage.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -81,6 +83,7 @@
 			children = (
 				AB0000000000000000000001 /* MindMeshApp.swift */,
 				AA0000000000000000000016 /* Theme */,
+				AA0000000000000000000027 /* Localization */,
 				AA0000000000000000000017 /* Models */,
 				AA0000000000000000000018 /* ViewModels */,
 				AA0000000000000000000019 /* Components */,
@@ -96,6 +99,14 @@
 				AB0000000000000000000003 /* Theme.swift */,
 			);
 			path = Theme;
+			sourceTree = "<group>";
+		};
+		AA0000000000000000000027 /* Localization */ = {
+			isa = PBXGroup;
+			children = (
+				AB0000000000000000000041 /* AppLanguage.swift */,
+			);
+			path = Localization;
 			sourceTree = "<group>";
 		};
 		AA0000000000000000000017 /* Models */ = {
@@ -251,6 +262,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				AB0000000000000000000002 /* MindMeshApp.swift in Sources */,
+				AB0000000000000000000042 /* AppLanguage.swift in Sources */,
 				AB0000000000000000000004 /* Theme.swift in Sources */,
 				AB0000000000000000000006 /* Models.swift in Sources */,
 				AB0000000000000000000008 /* HomeViewModel.swift in Sources */,

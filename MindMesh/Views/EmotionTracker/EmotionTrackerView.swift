@@ -2,7 +2,12 @@ import SwiftUI
 
 struct EmotionTrackerView: View {
     @StateObject private var vm = EmotionViewModel()
+    @EnvironmentObject private var languageStore: AppLanguageStore
     @State private var crownSelection = Double(MoodLevel.neutral.rawValue)
+
+    private var t: AppStrings {
+        AppStrings(language: languageStore.selectedLanguage)
+    }
 
     var body: some View {
         NavigationStack {
@@ -28,7 +33,7 @@ struct EmotionTrackerView: View {
                 .scrollDismissesKeyboard(.interactively)
                 .mmCrownSelection($crownSelection, range: 0...Double(MoodLevel.allCases.count - 1))
             }
-            .navigationTitle("Umore")
+            .navigationTitle(t.moodTitle)
             .navigationBarTitleDisplayMode(.large)
             .toolbarBackground(.hidden, for: .navigationBar)
             .sensoryFeedback(.selection, trigger: vm.selectedMood?.rawValue ?? -1)
@@ -49,7 +54,7 @@ struct EmotionTrackerView: View {
 
     private var emotionSelector: some View {
         VStack(alignment: .leading, spacing: MMSpacing.lg) {
-            Text("Scegli la voce che ti somiglia di piu adesso.")
+            Text(t.moodSelectorHint)
                 .font(.system(size: 16))
                 .foregroundStyle(.mmTextMuted)
                 .lineSpacing(4)
@@ -75,9 +80,9 @@ struct EmotionTrackerView: View {
 
     private var noteField: some View {
         VStack(alignment: .leading, spacing: 10) {
-            MMSectionLabel(text: "Nota")
+            MMSectionLabel(text: t.noteSection)
 
-            TextField("Se vuoi, aggiungi una riga su com'e andata.", text: $vm.noteText, axis: .vertical)
+            TextField(t.notePlaceholder, text: $vm.noteText, axis: .vertical)
                 .font(.system(size: 14))
                 .foregroundStyle(.mmTextPrimary)
                 .lineLimit(3...5)
@@ -96,7 +101,7 @@ struct EmotionTrackerView: View {
 
     private var logButton: some View {
         MMPrimaryButton(
-            title: vm.hasLoggedToday ? "Aggiorna la giornata" : "Salva come stai",
+            title: vm.hasLoggedToday ? t.updateDay : t.saveHowYouFeel,
             icon: "checkmark",
             gradient: .mmRoseGradient,
             glowColor: .mmRose
@@ -119,7 +124,7 @@ struct EmotionTrackerView: View {
                     .font(.system(size: 18))
                     .foregroundStyle(.mmAccent3)
 
-                Text("Fatto! Tutto pronto.")
+                Text(t.doneReady)
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundStyle(.mmTextPrimary)
             }
@@ -131,14 +136,14 @@ struct EmotionTrackerView: View {
         MMCard {
             VStack(alignment: .leading, spacing: MMSpacing.lg) {
                 VStack(alignment: .leading, spacing: 4) {
-                    MMSectionLabel(text: "Andamento")
-                    Text("Come si muove l'energia")
+                    MMSectionLabel(text: t.trendSection)
+                    Text(t.energyMovement)
                         .font(.system(size: 22, weight: .semibold, design: .rounded))
                         .foregroundStyle(.mmTextPrimary)
                 }
 
                 HStack(alignment: .bottom, spacing: 8) {
-                    ForEach(vm.weekBarData, id: \.day) { bar in
+                    ForEach(vm.weekBarData(language: languageStore.selectedLanguage), id: \.day) { bar in
                         VStack(spacing: 8) {
                             Spacer()
 
@@ -163,6 +168,7 @@ struct EmotionTrackerView: View {
 private struct MoodCard: View {
     let mood: MoodLevel
     let isSelected: Bool
+    @EnvironmentObject private var languageStore: AppLanguageStore
 
     var body: some View {
         MMCard(
@@ -192,11 +198,11 @@ private struct MoodCard: View {
                 }
 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(mood.label)
+                    Text(mood.label(in: languageStore.selectedLanguage))
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundStyle(.mmTextPrimary)
 
-                    Text(mood.detail)
+                    Text(mood.detail(in: languageStore.selectedLanguage))
                         .font(.system(size: 12))
                         .foregroundStyle(.mmTextMuted)
                         .lineLimit(3)
@@ -221,5 +227,6 @@ private struct MoodCard: View {
 struct EmotionTrackerView_Previews: PreviewProvider {
     static var previews: some View {
         EmotionTrackerView()
+            .environmentObject(AppLanguageStore(initialLanguage: .italian))
     }
 }

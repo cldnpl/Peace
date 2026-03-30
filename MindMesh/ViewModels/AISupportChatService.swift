@@ -47,20 +47,22 @@ enum AISupportServiceFactory {
     }
 
     private static func localBackendSelection() -> AISupportChatServiceSelection {
-        AISupportChatServiceSelection(
+        let t = AppStrings.current
+        return AISupportChatServiceSelection(
             service: RemoteAISupportChatService(endpointURL: localBackendURL),
-            sourceLabel: "Backend AI Locale",
-            sourceDetail: "Connesso a http://127.0.0.1:8787",
+            sourceLabel: t.sourceLocalBackend,
+            sourceDetail: t.sourceLocalBackendDetail,
             isRemote: true
         )
     }
 
     private static func configuredServiceSelection() -> AISupportChatServiceSelection? {
+        let t = AppStrings.current
         if let endpointURL = AIConfiguration.supportChatEndpointURL {
             return AISupportChatServiceSelection(
                 service: RemoteAISupportChatService(endpointURL: endpointURL),
-                sourceLabel: "Backend AI configurato",
-                sourceDetail: "La chat usa il backend AI remoto configurato.",
+                sourceLabel: t.sourceConfiguredBackend,
+                sourceDetail: t.sourceConfiguredBackendDetail,
                 isRemote: true
             )
         }
@@ -68,8 +70,8 @@ enum AISupportServiceFactory {
         if let configuration = OpenAIConfiguration.current {
             return AISupportChatServiceSelection(
                 service: OpenAIDirectSupportChatService(configuration: configuration),
-                sourceLabel: "OpenAI · \(configuration.model)",
-                sourceDetail: "La chat usa direttamente OpenAI.",
+                sourceLabel: t.sourceOpenAI(configuration.model),
+                sourceDetail: t.sourceOpenAIDetail,
                 isRemote: true
             )
         }
@@ -90,8 +92,8 @@ enum AISupportServiceFactory {
 
         return AISupportChatServiceSelection(
             service: service,
-            sourceLabel: "Apple Foundation Model",
-            sourceDetail: "Risposta on-device con Apple Intelligence.",
+            sourceLabel: AppStrings.current.sourceFoundationModel,
+            sourceDetail: AppStrings.current.sourceFoundationDetail,
             isRemote: false
         )
     }
@@ -103,21 +105,24 @@ enum AISupportServiceFactory {
 }
 
 private enum AISupportPromptBuilder {
-    static let instructions = """
-    Sei un supporto emotivo scritto in italiano. Devi sembrare caldo, presente, umano e naturale, non meccanico.
-    Obiettivo: aiutare la persona a sentirsi capita e a fare chiarezza, senza usare frasi standard o paternalistiche.
-    Regole:
-    - rispondi in italiano;
-    - parti da quello che la persona ha appena scritto, non dai dati dell'app;
-    - usa il contesto dell'app solo se davvero utile e in modo leggero;
-    - evita formule rigide tipo "provo a..." o "ti seguo";
-    - non fare diagnosi, non dire che sei un terapeuta, non fingere certezze cliniche;
-    - se emerge rischio imminente di autolesione o suicidio, interrompi il tono normale e indirizza subito a emergenza o a una persona reale da contattare adesso;
-    - fai risposte brevi o medie, molto naturali, con massimo un suggerimento pratico per volta;
-    - niente elenchi salvo quando servono davvero.
-    """
+    static func instructions(language: AppLanguage) -> String {
+        """
+        You are an emotionally supportive chat assistant. Write entirely in \(language.aiLanguageName).
+        You must sound warm, grounded, human, and natural, never mechanical.
+        Goal: help the person feel understood and gain clarity, without canned phrases or a patronizing tone.
+        Rules:
+        - respond in \(language.aiLanguageName);
+        - start from what the person just wrote, not from the app data;
+        - use the app context only if it is actually useful, and keep it light;
+        - avoid rigid formulas and therapist-sounding scripts;
+        - do not diagnose, do not pretend to be a therapist, and do not fake clinical certainty;
+        - if there is imminent risk of self-harm or suicide, stop the normal tone and immediately direct the user to emergency help or a real person they can contact now;
+        - keep answers short to medium, very natural, with at most one practical suggestion at a time;
+        - avoid bullet lists unless they truly help.
+        """
+    }
 
-    static func prompt(for context: AISupportChatContext) -> String {
+    static func prompt(for context: AISupportChatContext, language: AppLanguage) -> String {
         let recentMessages = context.conversation.suffix(8).map { message in
             let role = message.role == .assistant ? "assistant" : "user"
             return "\(role): \(message.text)"
@@ -126,25 +131,25 @@ private enum AISupportPromptBuilder {
         let snapshotSummary: String
         if let snapshot = context.snapshot {
             snapshotSummary = """
-            Contesto facoltativo dall'app:
-            - sintesi: \(snapshot.title)
-            - andamento: \(snapshot.trendLabel)
-            - energia: \(snapshot.energyLabel)
+            Optional app context:
+            - summary: \(snapshot.title)
+            - recent trend: \(snapshot.trendLabel)
+            - energy: \(snapshot.energyLabel)
             """
         } else {
-            snapshotSummary = "Contesto facoltativo dall'app: non disponibile."
+            snapshotSummary = "Optional app context: not available."
         }
 
         return """
-        Conversazione recente:
+        Recent conversation:
         \(recentMessages)
 
         \(snapshotSummary)
 
-        Ultimo messaggio dell'utente:
+        User's latest message:
         \(context.userInput)
 
-        Rispondi all'ultimo messaggio in modo empatico, naturale e specifico.
+        Reply to the user's latest message in \(language.aiLanguageName), in an empathic, natural, and specific way.
         """
     }
 }
@@ -197,6 +202,8 @@ final class OpenAIDirectSupportChatService: AISupportChatService {
     }
 
     func generateReply(context: AISupportChatContext) async throws -> AISupportChatResponse {
+        let language = AppLanguagePreferences.currentLanguage
+        let t = AppStrings(language: language)
         var request = URLRequest(url: configuration.baseURL)
         request.httpMethod = "POST"
         request.timeoutInterval = 45
@@ -205,8 +212,8 @@ final class OpenAIDirectSupportChatService: AISupportChatService {
 
         let payload = OpenAIResponsesRequest(
             model: configuration.model,
-            instructions: AISupportPromptBuilder.instructions,
-            input: AISupportPromptBuilder.prompt(for: context),
+            instructions: AISupportPromptBuilder.instructions(language: language),
+            input: AISupportPromptBuilder.prompt(for: context, language: language),
             reasoning: .init(effort: "low"),
             max_output_tokens: 420
         )
@@ -230,8 +237,8 @@ final class OpenAIDirectSupportChatService: AISupportChatService {
 
         return AISupportChatResponse(
             text: text,
-            sourceLabel: "OpenAI · \(configuration.model)",
-            sourceDetail: "Risposta generata direttamente da OpenAI.",
+            sourceLabel: t.sourceOpenAI(configuration.model),
+            sourceDetail: t.sourceOpenAIDetail,
             isRemote: true
         )
     }
@@ -247,6 +254,7 @@ final class RemoteAISupportChatService: AISupportChatService {
     }
 
     func generateReply(context: AISupportChatContext) async throws -> AISupportChatResponse {
+        let t = AppStrings.current
         var request = URLRequest(url: endpointURL)
         request.httpMethod = "POST"
         request.timeoutInterval = 30
@@ -287,11 +295,11 @@ final class RemoteAISupportChatService: AISupportChatService {
 
         let isLocalEndpoint = endpointURL.host == "127.0.0.1" || endpointURL.host == "localhost"
         let modelLabel = decoded.model?.trimmingCharacters(in: .whitespacesAndNewlines)
-        let baseLabel = isLocalEndpoint ? "Backend AI Locale" : "Backend AI"
+        let baseLabel = isLocalEndpoint ? t.sourceLocalBackend : t.sourceBackendAI
         let sourceLabel = modelLabel.map { "\(baseLabel) · \($0)" } ?? baseLabel
         let sourceDetail = isLocalEndpoint
-            ? "Risposta generata dal backend locale su http://127.0.0.1:8787."
-            : "Risposta generata dal backend AI configurato."
+            ? t.sourceLocalResponseDetail
+            : t.sourceConfiguredResponseDetail
 
         return AISupportChatResponse(
             text: trimmedReply,
@@ -326,15 +334,16 @@ final class FoundationModelAISupportChatService: AISupportChatService {
             break
         case .unavailable(let reason):
             throw AISupportChatServiceError.foundationModelUnavailable(
-                "Apple Intelligence non disponibile: \(String(describing: reason))."
+                AppStrings.current.appleIntelligenceUnavailable(String(describing: reason))
             )
         }
 
+        let language = AppLanguagePreferences.currentLanguage
         let session = LanguageModelSession(
             model: model,
-            instructions: AISupportPromptBuilder.instructions
+            instructions: AISupportPromptBuilder.instructions(language: language)
         )
-        let response = try await session.respond(to: AISupportPromptBuilder.prompt(for: context))
+        let response = try await session.respond(to: AISupportPromptBuilder.prompt(for: context, language: language))
         let text = response.content.trimmingCharacters(in: .whitespacesAndNewlines)
 
         guard !text.isEmpty else {
@@ -343,8 +352,8 @@ final class FoundationModelAISupportChatService: AISupportChatService {
 
         return AISupportChatResponse(
             text: text,
-            sourceLabel: "Apple Foundation Model",
-            sourceDetail: "Risposta on-device con Apple Intelligence.",
+            sourceLabel: AppStrings.current.sourceFoundationModel,
+            sourceDetail: AppStrings.current.sourceFoundationDetail,
             isRemote: false
         )
     }

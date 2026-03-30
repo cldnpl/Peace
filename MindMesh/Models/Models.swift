@@ -15,24 +15,44 @@ enum MoodLevel: Int, CaseIterable, Codable, Identifiable {
         }
     }
 
-    var label: String {
+    func label(in language: AppLanguage) -> String {
+        let t = AppStrings(language: language)
         switch self {
-        case .anxious: return "Tesa"
-        case .neutral: return "Stabile"
-        case .okay: return "Discreta"
-        case .good: return "Buona"
-        case .excellent: return "Lucida"
+        case .anxious:
+            return t.text(it: "Tesa", en: "Tense", es: "Tensa", fr: "Tendue", zh: "紧绷", ar: "متوترة", da: "Anspændt", nb: "Anspent", sv: "Spänd")
+        case .neutral:
+            return t.text(it: "Stabile", en: "Steady", es: "Estable", fr: "Stable", zh: "平稳", ar: "مستقرة", da: "Stabil", nb: "Stabil", sv: "Stabil")
+        case .okay:
+            return t.text(it: "Discreta", en: "Okay", es: "Bastante bien", fr: "Correcte", zh: "还可以", ar: "لا بأس", da: "Okay", nb: "Grei", sv: "Okej")
+        case .good:
+            return t.text(it: "Buona", en: "Good", es: "Buena", fr: "Bonne", zh: "不错", ar: "جيدة", da: "God", nb: "God", sv: "Bra")
+        case .excellent:
+            return t.text(it: "Lucida", en: "Clear", es: "Lúcida", fr: "Claire", zh: "清晰", ar: "صافية", da: "Klar", nb: "Klar", sv: "Klar")
+        }
+    }
+
+    var label: String {
+        label(in: AppLanguagePreferences.currentLanguage)
+    }
+
+    func detail(in language: AppLanguage) -> String {
+        let t = AppStrings(language: language)
+        switch self {
+        case .anxious:
+            return t.text(it: "Giornata stretta e un po' rumorosa.", en: "A tight, noisy kind of day.", es: "Un día tenso y algo ruidoso.", fr: "Une journée tendue et un peu bruyante.", zh: "这一天有些紧绷，也有点嘈杂。", ar: "يوم مشدود ومزعج قليلاً.", da: "En stram og lidt støjende dag.", nb: "En stram og litt støyende dag.", sv: "En spänd och lite stökig dag.")
+        case .neutral:
+            return t.text(it: "Sei in equilibrio, senza picchi.", en: "You're balanced, without strong peaks.", es: "Estás en equilibrio, sin picos fuertes.", fr: "Tu es en équilibre, sans grands pics.", zh: "你现在比较平衡，没有明显波动。", ar: "أنت في توازن من دون قمم حادة.", da: "Du er i balance uden store udsving.", nb: "Du er i balanse uten store topper.", sv: "Du är i balans utan stora toppar.")
+        case .okay:
+            return t.text(it: "C'è movimento, ma regge bene.", en: "There's movement, but it holds together well.", es: "Hay movimiento, pero se sostiene bien.", fr: "Il y a du mouvement, mais ça tient bien.", zh: "有些起伏，但整体还稳得住。", ar: "هناك حركة، لكنه ما زال متماسكاً.", da: "Der er bevægelse, men det holder godt.", nb: "Det er bevegelse, men det holder godt.", sv: "Det finns rörelse, men det håller ihop bra.")
+        case .good:
+            return t.text(it: "Hai una buona energia addosso.", en: "You have good energy around you.", es: "Tienes buena energía encima.", fr: "Tu as une bonne énergie en toi.", zh: "你的状态里有不错的能量。", ar: "لديك طاقة جيدة.", da: "Du har en god energi.", nb: "Du har god energi.", sv: "Du har bra energi.")
+        case .excellent:
+            return t.text(it: "Sei centrata e molto presente.", en: "You feel centered and very present.", es: "Te sientes centrada y muy presente.", fr: "Tu te sens centrée et très présente.", zh: "你很专注，也很在场。", ar: "أنت متزنة وحاضرة جداً.", da: "Du er centreret og meget nærværende.", nb: "Du er samlet og veldig til stede.", sv: "Du känns centrerad och mycket närvarande.")
         }
     }
 
     var detail: String {
-        switch self {
-        case .anxious: return "Giornata stretta e un po' rumorosa."
-        case .neutral: return "Sei in equilibrio, senza picchi."
-        case .okay: return "C'è movimento, ma regge bene."
-        case .good: return "Hai una buona energia addosso."
-        case .excellent: return "Sei centrata e molto presente."
-        }
+        detail(in: AppLanguagePreferences.currentLanguage)
     }
 
     var color: Color {
@@ -164,7 +184,7 @@ struct SupportChatSession: Identifiable, Codable {
             .text
             .trimmingCharacters(in: .whitespacesAndNewlines)
             .nilIfEmpty
-        ?? "Conversazione recente"
+        ?? AppStrings.current.recentConversationFallback
     }
 }
 

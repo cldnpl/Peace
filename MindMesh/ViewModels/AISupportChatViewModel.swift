@@ -6,8 +6,8 @@ final class AISupportChatViewModel: ObservableObject {
     @Published var draft = ""
     @Published private(set) var recentSessions: [SupportChatSession] = []
     @Published private(set) var isProcessing = false
-    @Published private(set) var sourceLabel = "Chat non configurata"
-    @Published private(set) var sourceDetail = "Configura OpenAI o un backend AI per attivare risposte reali."
+    @Published private(set) var sourceLabel = AppStrings.current.supportChatUnavailable
+    @Published private(set) var sourceDetail = AppStrings.current.supportNotConfigured
     @Published private(set) var isUsingRemoteModel = true
 
     private let store: MoodJournalStore
@@ -36,11 +36,12 @@ final class AISupportChatViewModel: ObservableObject {
     }
 
     var quickPrompts: [String] {
-        [
-            "Mi sento sopraffatta oggi",
-            "Ho pensieri molto negativi",
-            "Mi sento in colpa e faccio fatica a staccare",
-            "Aiutami a capire cosa sto provando"
+        let t = AppStrings.current
+        return [
+            t.quickPromptOverwhelmed,
+            t.quickPromptNegativeThoughts,
+            t.quickPromptGuilt,
+            t.quickPromptHelpUnderstand
         ]
     }
 
@@ -99,7 +100,7 @@ final class AISupportChatViewModel: ObservableObject {
                     role: .assistant,
                     text: failureMessage(for: error)
                 ))
-                sourceLabel = "Chat AI non disponibile"
+                sourceLabel = AppStrings.current.supportChatUnavailable
                 sourceDetail = detailMessage(for: error)
                 isUsingRemoteModel = false
                 isProcessing = false
@@ -135,48 +136,38 @@ final class AISupportChatViewModel: ObservableObject {
     }
 
     private func failureMessage(for error: Error) -> String {
+        let t = AppStrings.current
         if case AISupportChatServiceError.foundationModelUnavailable = error {
-            return "Apple Intelligence non è disponibile su questo dispositivo, quindi questa chat non può usare il Foundation Model."
+            return t.supportFoundationUnavailable
         }
 
         if case AISupportChatServiceError.notConfigured = error {
-            return "La chat AI non è ancora attiva. Inserisci una configurazione OpenAI o collega un backend per usare un modello reale."
+            return t.supportNotConfigured
         }
 
-        return "In questo momento il modello AI non sta rispondendo. Riprova tra poco."
+        return t.supportModelNoReply
     }
 
     private func detailMessage(for error: Error) -> String {
+        let t = AppStrings.current
         if case let AISupportChatServiceError.foundationModelUnavailable(detail) = error {
             return detail
         }
 
         if case AISupportChatServiceError.notConfigured = error {
-            return "Manca `MINDMESH_OPENAI_API_KEY` oppure un endpoint backend valido."
+            return t.missingOpenAIOrBackend
         }
 
-        return "La richiesta al modello remoto e fallita oppure la configurazione non e valida."
+        return t.invalidRemoteRequest
     }
 
     private static func makeWelcomeMessage(snapshot: MoodReflectionSnapshot?) -> String {
-        if let snapshot {
-            return """
-            Questa chat premium ti aiuta a mettere ordine nelle emozioni difficili, senza fare diagnosi. Dal tuo andamento recente emerge questo: \(snapshot.title.lowercased())
-
-            Se vuoi, raccontami cosa pesa di piu oggi e proviamo a scomporlo insieme.
-            """
-        }
-
-        return """
-        Questa chat premium ti aiuta a dare un nome alle emozioni difficili e a renderle piu leggibili, senza fare diagnosi o sostituire un professionista.
-
-        Scrivimi cosa senti in questo momento, anche in modo disordinato.
-        """
+        AppStrings.current.supportWelcome(snapshotTitle: snapshot?.title)
     }
 
     private static func makeSessionTitle(from messages: [SupportChatMessage]) -> String {
         guard let firstUserMessage = messages.first(where: { $0.role == .user })?.text.trimmingCharacters(in: .whitespacesAndNewlines) else {
-            return "Chat Premium"
+            return AppStrings.current.premiumChatTitle
         }
 
         if firstUserMessage.count <= 42 {

@@ -18,9 +18,9 @@ final class HomeViewModel: ObservableObject {
             .assign(to: &$moodEntries)
     }
 
-    var weekMoods: [(day: String, entry: MoodEntry?)] {
+    func weekMoods(language: AppLanguage) -> [(day: String, entry: MoodEntry?)] {
         let calendar = Calendar.current
-        let weekdays = ["Lu", "Ma", "Me", "Gi", "Ve", "Sa", "Do"]
+        let weekdays = language.weekdaySymbolsMondayFirst
         let today = Date()
         let todayWeekday = calendar.component(.weekday, from: today)
         let mondayOffset = (todayWeekday == 1 ? -6 : -(todayWeekday - 2))
@@ -31,35 +31,39 @@ final class HomeViewModel: ObservableObject {
         }
     }
 
-    var greeting: String {
+    func greeting(language: AppLanguage) -> String {
+        let t = AppStrings(language: language)
         let hour = Calendar.current.component(.hour, from: .now)
         switch hour {
-        case 0..<12: return "Buongiorno"
-        case 12..<18: return "Buon pomeriggio"
-        default: return "Buonasera"
+        case 0..<12: return t.greetingMorning
+        case 12..<18: return t.greetingAfternoon
+        default: return t.greetingEvening
         }
     }
 
-    var displayName: String {
+    func displayName(language: AppLanguage) -> String {
+        let t = AppStrings(language: language)
         let trimmed = userName.trimmingCharacters(in: .whitespacesAndNewlines)
-        return trimmed.isEmpty ? "tu" : trimmed
+        return trimmed.isEmpty ? t.displayNameFallback : trimmed
     }
 
-    var greetingLine: String {
-        "\(greeting) \(displayName)"
+    func greetingLine(language: AppLanguage) -> String {
+        "\(greeting(language: language)) \(displayName(language: language))"
     }
 
-    var dailyTitle: String {
-        if let snapshot = store.reflectionSnapshot() {
+    func dailyTitle(language: AppLanguage) -> String {
+        let t = AppStrings(language: language)
+        if let snapshot = store.reflectionSnapshot(language: language) {
             return snapshot.title
         }
-        return "Comincia da un check-in."
+        return t.startWithCheckin
     }
 
-    var dailyMessage: String {
-        if let snapshot = store.reflectionSnapshot() {
+    func dailyMessage(language: AppLanguage) -> String {
+        let t = AppStrings(language: language)
+        if let snapshot = store.reflectionSnapshot(language: language) {
             return snapshot.message
         }
-        return "Quando inizi a registrare l'umore con continuita, qui troverai una sintesi reale della settimana."
+        return t.startTrackingMessage
     }
 }

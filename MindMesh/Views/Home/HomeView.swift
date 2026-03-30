@@ -2,7 +2,12 @@ import SwiftUI
 
 struct HomeView: View {
     @StateObject private var vm = HomeViewModel()
+    @EnvironmentObject private var languageStore: AppLanguageStore
     @State private var expandedNoteEntryID: UUID?
+
+    private var t: AppStrings {
+        AppStrings(language: languageStore.selectedLanguage)
+    }
 
     var body: some View {
         NavigationStack {
@@ -20,7 +25,7 @@ struct HomeView: View {
                 .safeAreaPadding(.horizontal, MMSpacing.md)
                 .safeAreaPadding(.bottom, MMSpacing.sm)
             }
-            .navigationTitle("Home")
+            .navigationTitle(t.homeTitle)
             .navigationBarTitleDisplayMode(.large)
             .toolbarBackground(.hidden, for: .navigationBar)
         }
@@ -28,11 +33,11 @@ struct HomeView: View {
 
     private var greetingBlock: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(vm.greetingLine)
+            Text(vm.greetingLine(language: languageStore.selectedLanguage))
                 .font(MMFont.display(26, weight: .bold))
                 .foregroundStyle(.mmTextPrimary)
 
-            Text("Qui trovi il punto della giornata e l'andamento recente, senza altro rumore.")
+            Text(t.homeSubtitle)
                 .font(MMFont.body(14))
                 .foregroundStyle(.mmTextMuted)
                 .lineSpacing(3)
@@ -42,13 +47,13 @@ struct HomeView: View {
     private var overviewCard: some View {
         MMCard(padding: MMSpacing.lg, cornerRadius: MMRadius.md, borderColor: Color.mmAccent.opacity(0.14), backgroundColor: Color.mmCard.opacity(0.92)) {
             VStack(alignment: .leading, spacing: MMSpacing.md) {
-                MMSectionLabel(text: "Sintesi")
+                MMSectionLabel(text: t.summarySection)
 
-                Text(vm.dailyTitle)
+                Text(vm.dailyTitle(language: languageStore.selectedLanguage))
                     .font(MMFont.display(22, weight: .bold))
                     .foregroundStyle(.mmTextPrimary)
 
-                Text(vm.dailyMessage)
+                Text(vm.dailyMessage(language: languageStore.selectedLanguage))
                     .font(MMFont.body(13))
                     .foregroundStyle(.mmTextMuted)
                     .lineSpacing(3)
@@ -64,8 +69,8 @@ struct HomeView: View {
             VStack(alignment: .leading, spacing: MMSpacing.md) {
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
-                        MMSectionLabel(text: "Andamento")
-                        Text("Ultimi sette giorni")
+                        MMSectionLabel(text: t.trendSection)
+                        Text(t.lastSevenDays)
                             .font(MMFont.title(18, weight: .semibold))
                             .foregroundStyle(.mmTextPrimary)
                     }
@@ -73,12 +78,12 @@ struct HomeView: View {
                     Spacer()
 
                     if let latestMood = vm.moodEntries.last?.mood {
-                        MMInlineBadge(title: latestMood.label, icon: latestMood.symbolName, tint: latestMood.color)
+                        MMInlineBadge(title: latestMood.label(in: languageStore.selectedLanguage), icon: latestMood.symbolName, tint: latestMood.color)
                     }
                 }
 
                 HStack(spacing: 6) {
-                    ForEach(vm.weekMoods, id: \.day) { item in
+                    ForEach(vm.weekMoods(language: languageStore.selectedLanguage), id: \.day) { item in
                         VStack(spacing: 8) {
                             RoundedRectangle(cornerRadius: 12, style: .continuous)
                                 .fill((item.entry?.mood.color ?? Color.mmSurface).opacity(item.entry == nil ? 0.45 : 0.14))
@@ -97,7 +102,7 @@ struct HomeView: View {
                                 Button {
                                     toggleNote(for: item.entry)
                                 } label: {
-                                    Text("Nota")
+                                    Text(t.notePill)
                                         .font(MMFont.caption(9, weight: .semibold))
                                         .foregroundStyle(expandedNoteEntryID == item.entry?.id ? Color.white : (item.entry?.mood.color ?? .mmAccent))
                                         .padding(.horizontal, 8)
@@ -132,7 +137,7 @@ struct HomeView: View {
                                 .font(.system(size: 13, weight: .semibold))
                                 .foregroundStyle(selectedNote.entry.mood.color)
 
-                            Text("\(selectedNote.day) · La tua nota")
+                            Text(t.yourNote(day: selectedNote.day))
                                 .font(MMFont.caption(12, weight: .semibold))
                                 .foregroundStyle(.mmTextPrimary)
 
@@ -181,7 +186,7 @@ struct HomeView: View {
     }
 
     private var expandedWeekNote: (day: String, entry: MoodEntry)? {
-        vm.weekMoods.first { item in
+        vm.weekMoods(language: languageStore.selectedLanguage).first { item in
             item.entry?.id == expandedNoteEntryID && hasNote(for: item.entry)
         }.flatMap { item in
             guard let entry = item.entry else { return nil }
@@ -206,5 +211,6 @@ struct HomeView: View {
 struct HomeView_Previews: PreviewProvider {
     static var previews: some View {
         HomeView()
+            .environmentObject(AppLanguageStore(initialLanguage: .italian))
     }
 }

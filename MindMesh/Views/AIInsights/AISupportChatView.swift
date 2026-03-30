@@ -2,7 +2,12 @@ import SwiftUI
 
 struct AISupportChatView: View {
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var languageStore: AppLanguageStore
     @StateObject private var vm = AISupportChatViewModel()
+
+    private var t: AppStrings {
+        AppStrings(language: languageStore.selectedLanguage)
+    }
 
     var body: some View {
         NavigationStack {
@@ -42,18 +47,18 @@ struct AISupportChatView: View {
 
                 composer
             }
-            .navigationTitle("Chat Premium")
+            .navigationTitle(t.premiumChatTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.hidden, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Chiudi") {
+                    Button(t.close) {
                         dismiss()
                     }
                 }
 
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Nuova") {
+                    Button(t.newChat) {
                         vm.resetConversation()
                     }
                 }
@@ -73,7 +78,7 @@ struct AISupportChatView: View {
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundStyle(.mmAmber)
 
-                Text("Supporto emotivo leggero: utile per riflettere, non per emergenze, diagnosi o terapia.")
+                Text(t.supportChatSafety)
                     .font(MMFont.body(13))
                     .foregroundStyle(.mmTextMuted)
                     .lineSpacing(3)
@@ -88,13 +93,13 @@ struct AISupportChatView: View {
         if !vm.recentSessions.isEmpty {
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
-                    Text("Recenti")
+                    Text(t.recentChats)
                         .font(MMFont.caption(12, weight: .semibold))
                         .foregroundStyle(.mmTextMuted)
 
                     Spacer()
 
-                    Text("Solo Premium")
+                    Text(t.premiumOnly)
                         .font(MMFont.caption(11, weight: .medium))
                         .foregroundStyle(.mmTextDim)
                 }
@@ -196,7 +201,7 @@ struct AISupportChatView: View {
 
     private var typingBubble: some View {
         HStack {
-            bubble("Sto organizzando una risposta utile...", isAssistant: true)
+            bubble(t.supportTyping, isAssistant: true)
             Spacer(minLength: 40)
         }
         .transition(.opacity)
@@ -225,7 +230,7 @@ struct AISupportChatView: View {
                 .overlay(Color.mmBorder)
 
             HStack(alignment: .bottom, spacing: 12) {
-                TextField("Scrivi quello che senti...", text: $vm.draft, axis: .vertical)
+                TextField(t.supportInputPlaceholder, text: $vm.draft, axis: .vertical)
                     .font(MMFont.body(14))
                     .foregroundStyle(.mmTextPrimary)
                     .lineLimit(1...5)
@@ -270,5 +275,6 @@ struct AISupportChatView: View {
 struct AISupportChatView_Previews: PreviewProvider {
     static var previews: some View {
         AISupportChatView()
+            .environmentObject(AppLanguageStore(initialLanguage: .italian))
     }
 }

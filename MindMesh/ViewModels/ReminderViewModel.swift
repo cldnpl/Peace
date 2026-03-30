@@ -21,19 +21,20 @@ final class ReminderStore: ObservableObject {
     }
 
     var statusText: String {
+        let t = AppStrings.current
         if !isEnabled {
-            return "Nessun promemoria attivo."
+            return t.noReminder
         }
 
         switch authorizationStatus {
         case .authorized, .provisional, .ephemeral:
-            return "Promemoria attivo ogni giorno alle \(formattedTime(reminderTime))."
+            return t.reminderActive(at: formattedTime(reminderTime))
         case .denied:
-            return "Le notifiche sono disattivate. Puoi riattivarle dalle impostazioni di sistema."
+            return t.notificationsDisabled
         case .notDetermined:
-            return "Serve il tuo consenso per attivare il promemoria."
+            return t.reminderPermissionNeeded
         @unknown default:
-            return "Controlla le impostazioni notifiche per confermare il promemoria."
+            return t.reminderCheckSettings
         }
     }
 
@@ -92,7 +93,7 @@ final class ReminderStore: ObservableObject {
 
         let content = UNMutableNotificationContent()
         content.title = "Peace"
-        content.body = "Prenditi un momento per segnare come stai oggi."
+        content.body = AppStrings.current.reminderNotificationBody
         content.sound = .default
 
         let components = Calendar.current.dateComponents([.hour, .minute], from: reminderTime)
@@ -116,7 +117,11 @@ final class ReminderStore: ObservableObject {
     }
 
     private func formattedTime(_ date: Date) -> String {
-        date.formatted(date: .omitted, time: .shortened)
+        let formatter = DateFormatter()
+        formatter.locale = AppLanguagePreferences.currentLanguage.locale
+        formatter.dateStyle = .none
+        formatter.timeStyle = .short
+        return formatter.string(from: date)
     }
 
     private func add(_ request: UNNotificationRequest) async throws {

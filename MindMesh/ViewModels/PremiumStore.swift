@@ -50,15 +50,16 @@ final class PremiumStore: ObservableObject {
     }
 
     var purchaseButtonTitle: String {
+        let t = AppStrings.current
         if hasPremiumAccess {
-            return "Premium attivo"
+            return t.purchasePremiumActive
         }
 
         if let premiumProduct {
-            return "Attiva Premium · \(premiumProduct.displayPrice) al mese"
+            return t.purchasePremiumMonthly(price: premiumProduct.displayPrice)
         }
 
-        return "Attiva Premium"
+        return t.purchaseActivatePremium
     }
 
     var purchaseButtonIcon: String {
@@ -66,21 +67,22 @@ final class PremiumStore: ObservableObject {
     }
 
     var storeStatusText: String {
+        let t = AppStrings.current
         let configuredProducts = productIDs.joined(separator: ", ")
 
         if hasPremiumAccess {
-            return "Premium attivo su questo account. Gli acquisti si ripristinano automaticamente quando disponibili."
+            return t.premiumActiveAccount
         }
 
         if premiumProduct != nil {
-            return "L'acquisto usa StoreKit e si sblocca tramite il tuo account App Store."
+            return t.purchaseUsesStoreKit
         }
 
         if isLoadingProducts {
-            return "Sto caricando le opzioni di acquisto da App Store."
+            return t.purchaseLoadingProducts
         }
 
-        return "Lo shop non e ancora pronto. In debug usa lo scheme MindMesh con la configurazione locale MindMesh.storekit; per sandbox o produzione serve anche il prodotto App Store Connect con ID \(configuredProducts)."
+        return t.shopNotReady(productIDs: configuredProducts)
     }
 
     func prepare() async {
@@ -99,10 +101,10 @@ final class PremiumStore: ObservableObject {
             let products = try await Product.products(for: productIDs)
             premiumProduct = products.sorted { $0.price < $1.price }.first
             if premiumProduct == nil {
-                purchaseError = "Nessun prodotto premium trovato. Verifica la configurazione locale MindMesh.storekit oppure il prodotto App Store Connect con ID \(configuredProducts)."
+                purchaseError = AppStrings.current.noPremiumProductFound(productIDs: configuredProducts)
             }
         } catch {
-            purchaseError = "Non riesco a caricare lo shop in questo momento."
+            purchaseError = AppStrings.current.cannotLoadShop
         }
     }
 
@@ -118,7 +120,7 @@ final class PremiumStore: ObservableObject {
         }
 
         guard let premiumProduct else {
-            purchaseError = "Il prodotto premium non e disponibile. Controlla che lo scheme MindMesh usi MindMesh.storekit oppure che il prodotto App Store Connect sia pronto."
+            purchaseError = AppStrings.current.premiumProductUnavailable
             return
         }
 
@@ -133,19 +135,19 @@ final class PremiumStore: ObservableObject {
                 let transaction = try checkVerified(verification)
                 await refreshEntitlements()
                 await transaction.finish()
-                purchaseNotice = "Premium attivato correttamente."
+                purchaseNotice = AppStrings.current.premiumActivated
 
             case .userCancelled:
                 purchaseNotice = nil
 
             case .pending:
-                purchaseNotice = "L'acquisto e in attesa di conferma."
+                purchaseNotice = AppStrings.current.purchasePending
 
             @unknown default:
-                purchaseError = "Stato acquisto non riconosciuto."
+                purchaseError = AppStrings.current.purchaseUnknownState
             }
         } catch {
-            purchaseError = "L'acquisto non e andato a buon fine. Se stai testando in locale, avvia l'app dallo scheme MindMesh con la configurazione StoreKit inclusa."
+            purchaseError = AppStrings.current.purchaseFailed
         }
     }
 
@@ -163,10 +165,10 @@ final class PremiumStore: ObservableObject {
             try await AppStore.sync()
             await refreshEntitlements()
             purchaseNotice = hasPremiumAccess
-                ? "Acquisti ripristinati."
-                : "Nessun acquisto Premium trovato per questo account."
+                ? AppStrings.current.purchasesRestored
+                : AppStrings.current.noPremiumPurchaseFound
         } catch {
-            purchaseError = "Non riesco a ripristinare gli acquisti in questo momento."
+            purchaseError = AppStrings.current.restoreFailed
         }
     }
 
@@ -203,7 +205,7 @@ final class PremiumStore: ObservableObject {
                 await refreshEntitlements()
                 await transaction.finish()
             } catch {
-                purchaseError = "Aggiornamento acquisto non verificato."
+                purchaseError = AppStrings.current.purchaseUpdateUnverified
             }
         }
     }
