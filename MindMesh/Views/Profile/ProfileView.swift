@@ -60,10 +60,6 @@ struct SettingsView: View {
                                 Text(language.displayName).tag(language)
                             }
                         }
-
-                        Text(t.settingsLanguageFootnote)
-                            .font(MMFont.body(13))
-                            .foregroundStyle(.mmTextMuted)
                     }
 
                     Section(t.infoSection) {
