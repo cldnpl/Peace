@@ -19,7 +19,6 @@ struct EmotionTrackerView: View {
                             successBanner
                         }
 
-                        weekStrip
                         energyChart
                     }
                     .padding(.bottom, 40)
@@ -126,45 +125,6 @@ struct EmotionTrackerView: View {
             }
         }
         .transition(.move(edge: .top).combined(with: .opacity))
-    }
-
-    private var weekStrip: some View {
-        MMCard(backgroundColor: Color.mmCard.opacity(0.88)) {
-            VStack(alignment: .leading, spacing: MMSpacing.lg) {
-                HStack {
-                    VStack(alignment: .leading, spacing: 4) {
-                        MMSectionLabel(text: "Settimana")
-                        Text("Il ritmo dei giorni")
-                            .font(.system(size: 22, weight: .semibold, design: .rounded))
-                            .foregroundStyle(.mmTextPrimary)
-                    }
-
-                    Spacer()
-
-                    MMInlineBadge(title: "\(vm.loggedDaysThisMonth) registrazioni", icon: "calendar", tint: .mmAccent3)
-                }
-
-                HStack(spacing: 8) {
-                    ForEach(vm.weekData, id: \.day) { item in
-                        VStack(spacing: 8) {
-                            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                .fill((item.entry?.mood.color ?? Color.mmSurface).opacity(item.entry == nil ? 0.42 : 0.14))
-                                .frame(height: 46)
-                                .overlay(
-                                    Image(systemName: item.entry?.mood.symbolName ?? "minus")
-                                        .font(.system(size: 14, weight: .semibold))
-                                        .foregroundStyle(item.entry?.mood.color ?? .mmTextDim)
-                                )
-
-                            Text(item.day)
-                                .font(.system(size: 11, weight: .medium))
-                                .foregroundStyle(.mmTextDim)
-                        }
-                        .frame(maxWidth: .infinity)
-                    }
-                }
-            }
-        }
     }
 
     private var energyChart: some View {

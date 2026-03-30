@@ -11,11 +11,11 @@ struct AISupportChatView: View {
 
                 VStack(spacing: 0) {
                     safetyBanner
-                    sourceBanner
 
                     ScrollViewReader { proxy in
                         ScrollView(showsIndicators: false) {
                             VStack(alignment: .leading, spacing: MMSpacing.lg) {
+                                recentSessionsStrip
                                 quickPromptStrip
 
                                 ForEach(vm.messages) { message in
@@ -83,6 +83,76 @@ struct AISupportChatView: View {
         .padding(.top, MMSpacing.md)
     }
 
+    @ViewBuilder
+    private var recentSessionsStrip: some View {
+        if !vm.recentSessions.isEmpty {
+            VStack(alignment: .leading, spacing: 10) {
+                HStack {
+                    Text("Recenti")
+                        .font(MMFont.caption(12, weight: .semibold))
+                        .foregroundStyle(.mmTextMuted)
+
+                    Spacer()
+
+                    Text("Solo Premium")
+                        .font(MMFont.caption(11, weight: .medium))
+                        .foregroundStyle(.mmTextDim)
+                }
+
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 10) {
+                        ForEach(vm.recentSessions) { session in
+                            Button {
+                                vm.loadSession(session)
+                            } label: {
+                                VStack(alignment: .leading, spacing: 8) {
+                                    HStack(spacing: 8) {
+                                        Image(systemName: "quote.bubble")
+                                            .font(.system(size: 13, weight: .semibold))
+                                            .foregroundStyle(.mmAccent)
+
+                                        Text(session.updatedAt.formatted(date: .abbreviated, time: .omitted))
+                                            .font(MMFont.caption(11, weight: .medium))
+                                            .foregroundStyle(.mmTextDim)
+
+                                        Spacer(minLength: 0)
+                                    }
+
+                                    Text(session.title)
+                                        .font(MMFont.body(13))
+                                        .foregroundStyle(.mmTextPrimary)
+                                        .lineLimit(2)
+
+                                    Text(session.previewText)
+                                        .font(MMFont.caption(11))
+                                        .foregroundStyle(.mmTextMuted)
+                                        .lineLimit(2)
+                                }
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 12)
+                                .frame(width: 188, alignment: .leading)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                                        .fill(Color.mmCard.opacity(0.92))
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                                                .strokeBorder(
+                                                    vm.isCurrentSession(session)
+                                                        ? Color.mmAccent.opacity(0.28)
+                                                        : Color.mmBorderStrong,
+                                                    lineWidth: 1
+                                                )
+                                        )
+                                )
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     private var quickPromptStrip: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 10) {
@@ -109,33 +179,6 @@ struct AISupportChatView: View {
                 }
             }
         }
-    }
-
-    private var sourceBanner: some View {
-        MMCard(
-            padding: MMSpacing.md,
-            cornerRadius: MMRadius.md,
-            borderColor: (vm.isUsingRemoteModel ? Color.mmAccent : Color.mmRose).opacity(0.20),
-            backgroundColor: Color.mmCard.opacity(0.84)
-        ) {
-            VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    MMInlineBadge(
-                        title: vm.sourceLabel,
-                        icon: vm.isUsingRemoteModel ? "sparkles" : "exclamationmark.triangle.fill",
-                        tint: vm.isUsingRemoteModel ? .mmAccent : .mmRose
-                    )
-                    Spacer()
-                }
-
-                Text(vm.sourceDetail)
-                    .font(MMFont.body(13))
-                    .foregroundStyle(.mmTextMuted)
-                    .lineSpacing(3)
-            }
-        }
-        .padding(.horizontal, MMSpacing.lg)
-        .padding(.top, 8)
     }
 
     @ViewBuilder

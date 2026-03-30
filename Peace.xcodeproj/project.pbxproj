@@ -24,6 +24,7 @@
 		AB0000000000000000000033 /* AISupportChatViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000034 /* AISupportChatViewModel.swift */; };
 		AB0000000000000000000035 /* AISupportChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000036 /* AISupportChatView.swift */; };
 		AB0000000000000000000037 /* AISupportChatService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000038 /* AISupportChatService.swift */; };
+		AB0000000000000000000039 /* PremiumStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000040 /* PremiumStore.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -45,6 +46,7 @@
 		AB0000000000000000000034 /* AISupportChatViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AISupportChatViewModel.swift; sourceTree = "<group>"; };
 		AB0000000000000000000036 /* AISupportChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AISupportChatView.swift; sourceTree = "<group>"; };
 		AB0000000000000000000038 /* AISupportChatService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AISupportChatService.swift; sourceTree = "<group>"; };
+		AB0000000000000000000040 /* PremiumStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PremiumStore.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -112,6 +114,7 @@
 				AB0000000000000000000032 /* ReminderViewModel.swift */,
 				AB0000000000000000000038 /* AISupportChatService.swift */,
 				AB0000000000000000000034 /* AISupportChatViewModel.swift */,
+				AB0000000000000000000040 /* PremiumStore.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -255,6 +258,7 @@
 				AB0000000000000000000031 /* ReminderViewModel.swift in Sources */,
 				AB0000000000000000000037 /* AISupportChatService.swift in Sources */,
 				AB0000000000000000000033 /* AISupportChatViewModel.swift in Sources */,
+				AB0000000000000000000039 /* PremiumStore.swift in Sources */,
 				AB0000000000000000000014 /* SharedComponents.swift in Sources */,
 				AB0000000000000000000016 /* MainTabView.swift in Sources */,
 				AB0000000000000000000018 /* OnboardingView.swift in Sources */,

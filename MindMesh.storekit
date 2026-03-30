@@ -1,0 +1,57 @@
+{
+  "identifier" : "C4B889A1",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+
+  ],
+  "settings" : {
+
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "20010001",
+      "localizations" : [
+
+      ],
+      "name" : "MindMesh Premium",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "4.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "30010001",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Accesso mensile alle funzioni premium di MindMesh.",
+              "displayName" : "MindMesh Premium Mensile",
+              "locale" : "it_IT"
+            },
+            {
+              "description" : "Monthly access to MindMesh premium features.",
+              "displayName" : "MindMesh Premium Monthly",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "com.claudianapolitano.mindmesh.premium.monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "MindMesh Premium Monthly",
+          "subscriptionGroupID" : "20010001",
+          "type" : "RecurringSubscription"
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 2,
+    "minor" : 0
+  }
+}

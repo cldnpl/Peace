@@ -123,12 +123,12 @@ struct AIInsight: Identifiable {
     }
 }
 
-enum SupportMessageRole {
+enum SupportMessageRole: Codable {
     case assistant
     case user
 }
 
-struct SupportChatMessage: Identifiable {
+struct SupportChatMessage: Identifiable, Codable {
     let id: UUID
     let role: SupportMessageRole
     let text: String
@@ -144,6 +144,33 @@ struct SupportChatMessage: Identifiable {
         self.role = role
         self.text = text
         self.createdAt = createdAt
+    }
+}
+
+struct SupportChatSession: Identifiable, Codable {
+    let id: UUID
+    let title: String
+    let updatedAt: Date
+    let messages: [SupportChatMessage]
+
+    var previewText: String {
+        messages
+            .last(where: { $0.role == .user })?
+            .text
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .nilIfEmpty
+        ?? messages
+            .last?
+            .text
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .nilIfEmpty
+        ?? "Conversazione recente"
+    }
+}
+
+private extension String {
+    var nilIfEmpty: String? {
+        isEmpty ? nil : self
     }
 }
 

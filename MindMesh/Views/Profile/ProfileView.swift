@@ -4,7 +4,7 @@ struct SettingsView: View {
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = true
     @AppStorage("darkModeEnabled") private var darkModeOn = false
     @AppStorage("peace.userName") private var storedUserName = ""
-    @AppStorage("peace.premiumUnlocked") private var premiumUnlocked = false
+    @EnvironmentObject private var premiumStore: PremiumStore
     @ObservedObject private var reminderStore = ReminderStore.shared
     @State private var showPremiumSheet = false
     @State private var showProfile = false
@@ -45,7 +45,10 @@ struct SettingsView: View {
                         Button {
                             showPremiumSheet = true
                         } label: {
-                            Label(premiumUnlocked ? "Gestisci Peace Premium" : "Peace Premium", systemImage: premiumUnlocked ? "checkmark.circle.fill" : "sparkles")
+                            Label(
+                                premiumStore.hasPremiumAccess ? "Gestisci Peace Premium" : "Peace Premium",
+                                systemImage: premiumStore.hasPremiumAccess ? "checkmark.circle.fill" : "sparkles"
+                            )
                         }
                         .foregroundStyle(.mmTextPrimary)
                     }
@@ -97,8 +100,8 @@ struct SettingsView: View {
 
 struct ProfileView: View {
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var premiumStore: PremiumStore
     @AppStorage("peace.userName") private var storedUserName = ""
-    @AppStorage("peace.premiumUnlocked") private var premiumUnlocked = false
     @ObservedObject private var moodStore = MoodJournalStore.shared
     @State private var showPremiumSheet = false
 
@@ -114,7 +117,7 @@ struct ProfileView: View {
     }
 
     private var planLabel: String {
-        premiumUnlocked ? "Peace Premium" : "Piano base"
+        premiumStore.hasPremiumAccess ? "Peace Premium" : "Piano base"
     }
 
     var body: some View {
@@ -131,7 +134,12 @@ struct ProfileView: View {
                             StatCard(value: "\(recentCheckinsCount)", label: "Check-in ultimi 7 giorni", color: .mmAccent3)
                         }
 
-                        MMPrimaryButton(title: premiumUnlocked ? "Premium attivo" : "Scopri Premium", icon: premiumUnlocked ? "checkmark.circle.fill" : "sparkles", gradient: .mmRoseGradient, glowColor: .mmRose) {
+                        MMPrimaryButton(
+                            title: premiumStore.hasPremiumAccess ? "Premium attivo" : "Scopri Premium",
+                            icon: premiumStore.hasPremiumAccess ? "checkmark.circle.fill" : "sparkles",
+                            gradient: .mmRoseGradient,
+                            glowColor: .mmRose
+                        ) {
                             showPremiumSheet = true
                         }
                     }
@@ -193,13 +201,12 @@ struct ProfileView: View {
 
 struct PremiumSheet: View {
     @Environment(\.dismiss) private var dismiss
-    @AppStorage("peace.premiumUnlocked") private var premiumUnlocked = false
-    @State private var showResetAlert = false
+    @EnvironmentObject private var premiumStore: PremiumStore
 
     private let features = [
         ("sparkles", "Riflessioni più profonde", "Spunti meno generici e più mirati."),
         ("bubble.left.and.bubble.right", "Chat emotiva guidata", "Uno spazio premium per elaborare i momenti piu difficili."),
-        ("chart.line.uptrend.xyaxis", "Cronologia leggibile", "Vedi i cambi di tono nel tempo."),
+        ("clock.arrow.trianglehead.counterclockwise.rotate.90", "Cronologia chat recenti", "Riprendi le conversazioni premium senza perderne il filo."),
         ("icloud", "Sync tra dispositivi", "Apri il tuo spazio ovunque, senza ricominciare.")
     ]
 
@@ -261,38 +268,72 @@ struct PremiumSheet: View {
                         }
                     }
 
+                    if let purchaseNotice = premiumStore.purchaseNotice {
+                        MMCard(
+                            padding: MMSpacing.md,
+                            cornerRadius: MMRadius.md,
+                            borderColor: Color.mmAccent3.opacity(0.18),
+                            backgroundColor: Color.mmAccent3.opacity(0.10)
+                        ) {
+                            Text(purchaseNotice)
+                                .font(MMFont.body(13))
+                                .foregroundStyle(.mmTextPrimary)
+                        }
+                    }
+
+                    if let purchaseError = premiumStore.purchaseError {
+                        MMCard(
+                            padding: MMSpacing.md,
+                            cornerRadius: MMRadius.md,
+                            borderColor: Color.mmRose.opacity(0.18),
+                            backgroundColor: Color.mmRose.opacity(0.08)
+                        ) {
+                            Text(purchaseError)
+                                .font(MMFont.body(13))
+                                .foregroundStyle(.mmTextPrimary)
+                        }
+                    }
+
+                    Text(premiumStore.storeStatusText)
+                        .font(MMFont.body(13))
+                        .foregroundStyle(.mmTextMuted)
+                        .multilineTextAlignment(.center)
+                        .lineSpacing(3)
+
                     VStack(spacing: 12) {
                         MMPrimaryButton(
-                            title: premiumUnlocked ? "Premium già attivo" : "Attiva Premium · €4,99 al mese",
-                            icon: premiumUnlocked ? "checkmark.circle.fill" : "sparkles",
+                            title: premiumStore.purchaseButtonTitle,
+                            icon: premiumStore.purchaseButtonIcon,
                             gradient: LinearGradient.mmAccentGradient,
                             glowColor: .mmAccent
                         ) {
-                            premiumUnlocked = true
-                            dismiss()
-                        }
-                        .disabled(premiumUnlocked)
-                        .opacity(premiumUnlocked ? 0.7 : 1)
-
-                        if premiumUnlocked {
-                            MMSecondaryButton(title: "Torna al piano standard", icon: "arrow.uturn.backward.circle", tint: .mmRose) {
-                                showResetAlert = true
+                            Task {
+                                await premiumStore.purchasePremium()
+                                if premiumStore.hasPremiumAccess {
+                                    dismiss()
+                                }
                             }
                         }
+                        .disabled(premiumStore.hasPremiumAccess || premiumStore.isPurchasing || premiumStore.isLoadingProducts)
+                        .opacity((premiumStore.hasPremiumAccess || premiumStore.isPurchasing) ? 0.7 : 1)
+
+                        MMSecondaryButton(title: "Ripristina acquisti", icon: "arrow.clockwise.circle", tint: .mmAccent3) {
+                            Task {
+                                await premiumStore.restorePurchases()
+                                if premiumStore.hasPremiumAccess {
+                                    dismiss()
+                                }
+                            }
+                        }
+                        .disabled(premiumStore.isRestoring)
                     }
                     .padding(.bottom, 40)
                 }
                 .padding(.horizontal, MMSpacing.xl)
             }
         }
-        .alert("Tornare al piano standard?", isPresented: $showResetAlert) {
-            Button("Annulla", role: .cancel) {}
-            Button("Conferma", role: .destructive) {
-                premiumUnlocked = false
-                dismiss()
-            }
-        } message: {
-            Text("Il piano Premium verra disattivato su questo dispositivo e l'app tornera alla versione standard.")
+        .task {
+            await premiumStore.prepare()
         }
     }
 }
@@ -302,12 +343,15 @@ struct SettingsView_Previews: PreviewProvider {
         Group {
             SettingsView()
                 .previewDisplayName("Impostazioni")
+                .environmentObject(PremiumStore(storeKitEnabled: false, initialPremiumAccess: false))
 
             ProfileView()
                 .previewDisplayName("Profilo")
+                .environmentObject(PremiumStore(storeKitEnabled: false, initialPremiumAccess: true))
 
             PremiumSheet()
                 .previewDisplayName("Premium")
+                .environmentObject(PremiumStore(storeKitEnabled: false, initialPremiumAccess: false))
         }
     }
 }
