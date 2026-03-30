@@ -1,7 +1,7 @@
-# MindMesh 🧊
+# Peace 🧊
 **Simple. Blue. Yours.**
 
-MindMesh is a native iPhone app to track your mood without digital mess.
+Peace is a native iPhone app to track your mood without digital mess.
 
 ---
 
@@ -49,7 +49,3 @@ The premium support chat now has a real backend in `backend/server.mjs`.
 - **AI Reflections:** Local weekly insights with optional premium support chat.
 - **Safe Area Optimized:** Perfect layout for Dynamic Island and all iPhone models.
 
----
-
-### 🖋 Author
-**Claudia Napolitano** *Project started: Sept 2025*
