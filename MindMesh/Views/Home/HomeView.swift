@@ -16,6 +16,7 @@ struct HomeView: View {
 
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: MMSpacing.xl) {
+                        Spacer()
                         greetingBlock
                         overviewCard
                         moodCard
@@ -25,7 +26,6 @@ struct HomeView: View {
                 .safeAreaPadding(.horizontal, MMSpacing.md)
                 .safeAreaPadding(.bottom, MMSpacing.sm)
             }
-            .navigationTitle(t.homeTitle)
             .navigationBarTitleDisplayMode(.large)
             .toolbarBackground(.hidden, for: .navigationBar)
         }
@@ -33,6 +33,7 @@ struct HomeView: View {
 
     private var greetingBlock: some View {
         VStack(alignment: .leading, spacing: 4) {
+            Spacer()
             Text(vm.greetingLine(language: languageStore.selectedLanguage))
                 .font(MMFont.display(26, weight: .bold))
                 .foregroundStyle(.mmTextPrimary)

@@ -17,7 +17,6 @@ final class HomeViewModel: ObservableObject {
             .receive(on: RunLoop.main)
             .assign(to: &$moodEntries)
     }
-
     func weekMoods(language: AppLanguage) -> [(day: String, entry: MoodEntry?)] {
         let calendar = Calendar.current
         let weekdays = language.weekdaySymbolsMondayFirst
