@@ -15,7 +15,7 @@
       "localizations" : [
 
       ],
-      "name" : "MindMesh Premium",
+      "name" : "Peace Premium",
       "subscriptions" : [
         {
           "adHocOffers" : [
@@ -31,19 +31,19 @@
           "introductoryOffer" : null,
           "localizations" : [
             {
-              "description" : "Accesso mensile alle funzioni premium di MindMesh.",
-              "displayName" : "MindMesh Premium Mensile",
+              "description" : "Accesso mensile alle funzioni premium di Peace.",
+              "displayName" : "Peace Premium Mensile",
               "locale" : "it_IT"
             },
             {
-              "description" : "Monthly access to MindMesh premium features.",
-              "displayName" : "MindMesh Premium Monthly",
+              "description" : "Monthly access to Peace premium features.",
+              "displayName" : "Peace Premium Monthly",
               "locale" : "en_US"
             }
           ],
           "productID" : "com.claudianapolitano.mindmesh.premium.monthly",
           "recurringSubscriptionPeriod" : "P1M",
-          "referenceName" : "MindMesh Premium Monthly",
+          "referenceName" : "Peace Premium Monthly",
           "subscriptionGroupID" : "20010001",
           "type" : "RecurringSubscription"
         }

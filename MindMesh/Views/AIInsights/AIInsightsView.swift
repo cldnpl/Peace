@@ -150,45 +150,49 @@ struct AIInsightsView: View {
                 }
             }
         } else {
-            MMCard(borderColor: Color.mmAccent.opacity(0.14), backgroundColor: Color.mmCard.opacity(0.92)) {
-                VStack(alignment: .leading, spacing: MMSpacing.lg) {
-                    HStack {
-                        MMSectionLabel(text: t.fullAnalysis)
-                        Spacer()
-                        Image(systemName: "lock.fill")
+            lockedPremiumCard
+        }
+    }
+
+    private var lockedPremiumCard: some View {
+        MMCard(borderColor: Color.mmAccent.opacity(0.14), backgroundColor: Color.mmCard.opacity(0.92)) {
+            VStack(alignment: .leading, spacing: MMSpacing.lg) {
+                HStack {
+                    MMSectionLabel(text: t.fullAnalysis)
+                    Spacer()
+                    Image(systemName: "lock.fill")
+                        .foregroundStyle(.mmAccent)
+                }
+
+                Text(t.lockedAnalysisTitle)
+                    .font(MMFont.title(22, weight: .semibold))
+                    .foregroundStyle(.mmTextPrimary)
+
+                Text(t.lockedAnalysisBody)
+                    .font(MMFont.body(14))
+                    .foregroundStyle(.mmTextMuted)
+                    .lineSpacing(4)
+
+                MMCard(
+                    padding: MMSpacing.lg,
+                    cornerRadius: MMRadius.md,
+                    borderColor: Color.mmAccent.opacity(0.14),
+                    backgroundColor: Color.mmSurface.opacity(0.76)
+                ) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(t.includedInPremium)
+                            .font(MMFont.caption(12, weight: .semibold))
                             .foregroundStyle(.mmAccent)
+
+                        Text(t.premiumBundleDescription)
+                            .font(MMFont.body(14))
+                            .foregroundStyle(.mmTextPrimary)
+                            .lineSpacing(3)
                     }
+                }
 
-                    Text(t.lockedAnalysisTitle)
-                        .font(MMFont.title(22, weight: .semibold))
-                        .foregroundStyle(.mmTextPrimary)
-
-                    Text(t.lockedAnalysisBody)
-                        .font(MMFont.body(14))
-                        .foregroundStyle(.mmTextMuted)
-                        .lineSpacing(4)
-
-                    MMCard(
-                        padding: MMSpacing.lg,
-                        cornerRadius: MMRadius.md,
-                        borderColor: Color.mmAccent.opacity(0.14),
-                        backgroundColor: Color.mmSurface.opacity(0.76)
-                    ) {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text(t.includedInPremium)
-                                .font(MMFont.caption(12, weight: .semibold))
-                                .foregroundStyle(.mmAccent)
-
-                            Text(t.premiumBundleDescription)
-                                .font(MMFont.body(14))
-                                .foregroundStyle(.mmTextPrimary)
-                                .lineSpacing(3)
-                        }
-                    }
-
-                    MMPrimaryButton(title: t.unlockFullAnalysis, icon: "sparkles") {
-                        showPremiumSheet = true
-                    }
+                MMPrimaryButton(title: t.unlockFullAnalysis, icon: "sparkles") {
+                    showPremiumSheet = true
                 }
             }
         }
@@ -265,25 +269,31 @@ struct AIInsightsView: View {
     }
 
     private var emptyState: some View {
-        MMCard(borderColor: Color.mmAccent.opacity(0.14), backgroundColor: Color.mmCard.opacity(0.92)) {
-            VStack(alignment: .leading, spacing: MMSpacing.lg) {
-                RoundedRectangle(cornerRadius: 20, style: .continuous)
-                    .fill(Color.mmSurface)
-                    .frame(width: 56, height: 56)
-                    .overlay(
-                        Image(systemName: "quote.bubble")
-                            .font(.system(size: 24, weight: .semibold))
-                            .foregroundStyle(.mmAccent)
-                    )
+        VStack(alignment: .leading, spacing: MMSpacing.xxxl) {
+            MMCard(borderColor: Color.mmAccent.opacity(0.14), backgroundColor: Color.mmCard.opacity(0.92)) {
+                VStack(alignment: .leading, spacing: MMSpacing.lg) {
+                    RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        .fill(Color.mmSurface)
+                        .frame(width: 56, height: 56)
+                        .overlay(
+                            Image(systemName: "quote.bubble")
+                                .font(.system(size: 24, weight: .semibold))
+                                .foregroundStyle(.mmAccent)
+                        )
 
-                Text(t.notEnoughDataTitle)
-                    .font(MMFont.display(28, weight: .bold))
-                    .foregroundStyle(.mmTextPrimary)
+                    Text(t.notEnoughDataTitle)
+                        .font(MMFont.display(28, weight: .bold))
+                        .foregroundStyle(.mmTextPrimary)
 
-                Text(t.notEnoughDataBody)
-                    .font(MMFont.body(15))
-                    .foregroundStyle(.mmTextMuted)
-                    .lineSpacing(4)
+                    Text(t.notEnoughDataBody)
+                        .font(MMFont.body(15))
+                        .foregroundStyle(.mmTextMuted)
+                        .lineSpacing(4)
+                }
+            }
+
+            if !premiumStore.hasPremiumAccess {
+                lockedPremiumCard
             }
         }
     }

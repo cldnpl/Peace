@@ -1,4 +1,5 @@
 import SwiftUI
+import WebKit
 
 struct SettingsView: View {
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = true
@@ -62,9 +63,16 @@ struct SettingsView: View {
                         }
                     }
 
+                    Section(t.settingsLegalSection) {
+                        NavigationLink {
+                            PrivacyPolicyView()
+                        } label: {
+                            Label(t.privacyPolicyTitle, systemImage: "hand.raised.fill")
+                        }
+                    }
+
                     Section(t.infoSection) {
                         LabeledContent(t.versionLabel, value: version)
-
                     }
 
                     Section {
@@ -215,6 +223,7 @@ struct ProfileView: View {
 
 struct PremiumSheet: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.scenePhase) private var scenePhase
     @EnvironmentObject private var languageStore: AppLanguageStore
     @EnvironmentObject private var premiumStore: PremiumStore
 
@@ -259,6 +268,8 @@ struct PremiumSheet: View {
                             .padding(.horizontal, MMSpacing.md)
                     }
                     .padding(.top, MMSpacing.xxxl)
+
+                    storeKitStateCard
 
                     MMCard {
                         VStack(spacing: MMSpacing.lg) {
@@ -354,8 +365,137 @@ struct PremiumSheet: View {
             }
         }
         .task {
-            await premiumStore.prepare()
+            await premiumStore.prepare(force: true)
         }
+        .onChange(of: scenePhase) { phase in
+            guard phase == .active else { return }
+            Task {
+                await premiumStore.prepare(force: true)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var storeKitStateCard: some View {
+        if let productName = premiumStore.premiumProductName,
+           let productPrice = premiumStore.premiumProductPrice {
+            MMCard(
+                padding: MMSpacing.lg,
+                cornerRadius: MMRadius.md,
+                borderColor: Color.mmAccent.opacity(0.16),
+                backgroundColor: Color.mmAccent.opacity(0.08)
+            ) {
+                VStack(alignment: .leading, spacing: 10) {
+                    Text(t.storeOfferReadyTitle)
+                        .font(MMFont.caption(11, weight: .semibold))
+                        .tracking(1.2)
+                        .foregroundStyle(.mmAccent)
+
+                    Text(productName)
+                        .font(MMFont.title(18, weight: .semibold))
+                        .foregroundStyle(.mmTextPrimary)
+
+                    HStack {
+                        MMTag(text: productPrice, color: .mmAccent)
+                        Spacer(minLength: 0)
+                    }
+
+                    Text(t.storeOfferReadyBody(name: productName, price: productPrice))
+                        .font(MMFont.body(13))
+                        .foregroundStyle(.mmTextMuted)
+                        .lineSpacing(3)
+                }
+            }
+        } else {
+            MMCard(
+                padding: MMSpacing.lg,
+                cornerRadius: MMRadius.md,
+                borderColor: Color.mmAmber.opacity(0.18),
+                backgroundColor: Color.mmAmber.opacity(0.08)
+            ) {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text(t.storeOfferMissingTitle)
+                        .font(MMFont.title(17, weight: .semibold))
+                        .foregroundStyle(.mmTextPrimary)
+
+                    Text(t.storeOfferMissingBody)
+                        .font(MMFont.body(13))
+                        .foregroundStyle(.mmTextMuted)
+                        .lineSpacing(3)
+
+                    MMSecondaryButton(
+                        title: t.refreshShop,
+                        icon: "arrow.clockwise",
+                        tint: .mmAccent
+                    ) {
+                        Task {
+                            await premiumStore.prepare(force: true)
+                        }
+                    }
+                    .disabled(premiumStore.isLoadingProducts)
+                    .opacity(premiumStore.isLoadingProducts ? 0.7 : 1)
+                }
+            }
+        }
+    }
+}
+
+struct PrivacyPolicyView: View {
+    @EnvironmentObject private var languageStore: AppLanguageStore
+
+    private var t: AppStrings {
+        AppStrings(language: languageStore.selectedLanguage)
+    }
+
+    var body: some View {
+        ZStack {
+            AmbientBackground()
+
+            if let fileURL = Bundle.main.url(forResource: "privacy", withExtension: "html") {
+                PrivacyPolicyWebView(fileURL: fileURL)
+                    .clipShape(RoundedRectangle(cornerRadius: MMRadius.lg, style: .continuous))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: MMRadius.lg, style: .continuous)
+                            .strokeBorder(Color.mmBorder, lineWidth: 1)
+                    )
+                    .safeAreaPadding(.horizontal, MMSpacing.lg)
+                    .safeAreaPadding(.vertical, MMSpacing.md)
+            } else {
+                ScrollView(showsIndicators: false) {
+                    MMCard {
+                        Text(t.privacyPolicyMissing)
+                            .font(MMFont.body(15))
+                            .foregroundStyle(.mmTextPrimary)
+                    }
+                    .padding(.horizontal, MMSpacing.lg)
+                    .padding(.top, MMSpacing.lg)
+                }
+            }
+        }
+        .navigationTitle(t.privacyPolicyTitle)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(.hidden, for: .navigationBar)
+    }
+}
+
+private struct PrivacyPolicyWebView: UIViewRepresentable {
+    let fileURL: URL
+
+    func makeUIView(context: Context) -> WKWebView {
+        let configuration = WKWebViewConfiguration()
+        configuration.defaultWebpagePreferences.allowsContentJavaScript = false
+
+        let webView = WKWebView(frame: .zero, configuration: configuration)
+        webView.isOpaque = false
+        webView.backgroundColor = .clear
+        webView.scrollView.backgroundColor = .clear
+        webView.scrollView.contentInsetAdjustmentBehavior = .never
+        return webView
+    }
+
+    func updateUIView(_ webView: WKWebView, context: Context) {
+        guard webView.url != fileURL else { return }
+        webView.loadFileURL(fileURL, allowingReadAccessTo: fileURL.deletingLastPathComponent())
     }
 }
 

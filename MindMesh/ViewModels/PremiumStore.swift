@@ -8,6 +8,7 @@ final class PremiumStore: ObservableObject {
     @Published private(set) var isLoadingProducts = false
     @Published private(set) var isPurchasing = false
     @Published private(set) var isRestoring = false
+    @Published private(set) var lastProductRefreshAt: Date?
     @Published var purchaseNotice: String?
     @Published var purchaseError: String?
 
@@ -15,6 +16,7 @@ final class PremiumStore: ObservableObject {
     private let storeKitEnabled: Bool
     private let cacheKey = "mindmesh.premium.cachedAccess"
     private let legacyAccessKey = "peace.premiumUnlocked"
+    private let debugUnlockKey = "mindmesh.premium.debug.localUnlock"
     private var transactionUpdatesTask: Task<Void, Never>?
 
     init(
@@ -29,7 +31,10 @@ final class PremiumStore: ObservableObject {
             self.hasPremiumAccess = initialPremiumAccess
         } else {
             let defaults = UserDefaults.standard
-            self.hasPremiumAccess = defaults.bool(forKey: cacheKey) || defaults.bool(forKey: legacyAccessKey)
+            self.hasPremiumAccess =
+                defaults.bool(forKey: cacheKey) ||
+                defaults.bool(forKey: legacyAccessKey) ||
+                defaults.bool(forKey: debugUnlockKey)
         }
 
         guard storeKitEnabled else { return }
@@ -74,37 +79,65 @@ final class PremiumStore: ObservableObject {
             return t.premiumActiveAccount
         }
 
+        if isLoadingProducts {
+            return t.purchaseLoadingProducts
+        }
+
         if premiumProduct != nil {
             return t.purchaseUsesStoreKit
         }
 
-        if isLoadingProducts {
-            return t.purchaseLoadingProducts
+        if canUseDebugLocalUnlock {
+            return t.debugPremiumStatus
         }
 
         return t.shopNotReady(productIDs: configuredProducts)
     }
 
-    func prepare() async {
+    var premiumProductName: String? {
+        premiumProduct?.displayName
+    }
+
+    var premiumProductPrice: String? {
+        premiumProduct?.displayPrice
+    }
+
+    func prepare(force: Bool = false) async {
+        if !force, (isLoadingProducts || isPurchasing || isRestoring) {
+            return
+        }
+
         await refreshProducts()
         await refreshEntitlements()
     }
 
     func refreshProducts() async {
         guard storeKitEnabled else { return }
+        guard !isLoadingProducts else { return }
 
         isLoadingProducts = true
         defer { isLoadingProducts = false }
+        purchaseError = nil
         let configuredProducts = productIDs.joined(separator: ", ")
 
         do {
             let products = try await Product.products(for: productIDs)
-            premiumProduct = products.sorted { $0.price < $1.price }.first
+            premiumProduct = products
+                .filter { productIDs.contains($0.id) }
+                .sorted { $0.price < $1.price }
+                .first
+            lastProductRefreshAt = .now
             if premiumProduct == nil {
-                purchaseError = AppStrings.current.noPremiumProductFound(productIDs: configuredProducts)
+                if !canUseDebugLocalUnlock {
+                    purchaseError = AppStrings.current.noPremiumProductFound(productIDs: configuredProducts)
+                }
             }
         } catch {
-            purchaseError = AppStrings.current.cannotLoadShop
+            premiumProduct = nil
+            lastProductRefreshAt = .now
+            if !canUseDebugLocalUnlock {
+                purchaseError = AppStrings.current.cannotLoadShop
+            }
         }
     }
 
@@ -120,6 +153,12 @@ final class PremiumStore: ObservableObject {
         }
 
         guard let premiumProduct else {
+            if canUseDebugLocalUnlock {
+                applyPremiumAccess(true, debugLocalUnlock: true)
+                purchaseNotice = AppStrings.current.debugPremiumUnlocked
+                return
+            }
+
             purchaseError = AppStrings.current.premiumProductUnavailable
             return
         }
@@ -186,14 +225,31 @@ final class PremiumStore: ObservableObject {
             break
         }
 
-        applyPremiumAccess(premiumActive)
+        if !premiumActive, canUseDebugLocalUnlock {
+            premiumActive = UserDefaults.standard.bool(forKey: debugUnlockKey)
+        }
+
+        applyPremiumAccess(premiumActive, debugLocalUnlock: premiumActive && canUseDebugLocalUnlock && UserDefaults.standard.bool(forKey: debugUnlockKey))
     }
 
-    private func applyPremiumAccess(_ isActive: Bool) {
+    private func applyPremiumAccess(_ isActive: Bool, debugLocalUnlock: Bool = false) {
         hasPremiumAccess = isActive
         let defaults = UserDefaults.standard
         defaults.set(isActive, forKey: cacheKey)
         defaults.set(isActive, forKey: legacyAccessKey)
+        defaults.set(debugLocalUnlock && isActive, forKey: debugUnlockKey)
+    }
+
+    private var canUseDebugLocalUnlock: Bool {
+        #if DEBUG
+        return true
+        #elseif targetEnvironment(simulator)
+        return true
+        #else
+        let environment = ProcessInfo.processInfo.environment
+        return environment["OS_ACTIVITY_DT_MODE"] == "YES" ||
+            environment["__XCODE_BUILT_PRODUCTS_DIR_PATHS"] != nil
+        #endif
     }
 
     private func observeTransactionUpdates() async {
