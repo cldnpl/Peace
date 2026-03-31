@@ -3,6 +3,7 @@ import SwiftUI
 struct OnboardingView: View {
     @Binding var hasSeenOnboarding: Bool
     @EnvironmentObject private var languageStore: AppLanguageStore
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @AppStorage("peace.userName") private var storedUserName = ""
     @State private var orb = false
     @State private var appear = false
@@ -24,23 +25,49 @@ struct OnboardingView: View {
         ZStack {
             AmbientBackground()
 
-            ScrollView(showsIndicators: false) {
-                VStack(spacing: 0) {
-                    Spacer(minLength: MMSpacing.xl)
+            GeometryReader { proxy in
+                let layout = MMLayoutMetrics(size: proxy.size, horizontalSizeClass: horizontalSizeClass)
 
-                    hero
-                        .padding(.bottom, MMSpacing.xxl)
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 0) {
+                        Spacer(minLength: layout.isPad ? MMSpacing.xxxl : MMSpacing.xl)
 
-                    intro
-                        .padding(.bottom, MMSpacing.xxl)
+                        if layout.prefersSplitLayout {
+                            HStack(alignment: .center, spacing: layout.sectionSpacing) {
+                                VStack(spacing: 0) {
+                                    hero(layout: layout)
+                                        .padding(.bottom, MMSpacing.xxl)
 
-                    featureList
-                        .padding(.bottom, MMSpacing.xxxl)
+                                    intro(layout: layout)
+                                }
+                                .frame(maxWidth: .infinity)
 
-                    actions
+                                VStack(spacing: 0) {
+                                    featureList(layout: layout)
+                                        .padding(.bottom, MMSpacing.xxxl)
+
+                                    actions(layout: layout)
+                                }
+                                .frame(maxWidth: .infinity)
+                            }
+                        } else {
+                            hero(layout: layout)
+                                .padding(.bottom, MMSpacing.xxl)
+
+                            intro(layout: layout)
+                                .padding(.bottom, MMSpacing.xxl)
+
+                            featureList(layout: layout)
+                                .padding(.bottom, MMSpacing.xxxl)
+
+                            actions(layout: layout)
+                        }
+                    }
+                    .frame(maxWidth: layout.screenContentWidth, alignment: .center)
+                    .frame(maxWidth: .infinity)
+                    .padding(.horizontal, layout.horizontalPadding)
+                    .padding(.bottom, layout.isPad ? MMSpacing.xxxl : MMSpacing.xxl)
                 }
-                .padding(.horizontal, MMSpacing.xl)
-                .padding(.bottom, MMSpacing.xxl)
             }
         }
         .onAppear {
@@ -52,18 +79,18 @@ struct OnboardingView: View {
         }
     }
 
-    private var hero: some View {
+    private func hero(layout: MMLayoutMetrics) -> some View {
         ZStack {
-            PulsingCircle(color: .mmAccent, size: 126)
+            PulsingCircle(color: .mmAccent, size: layout.isPad ? 162 : 126)
 
             Circle()
                 .fill(Color.mmCard.opacity(0.92))
-                .frame(width: 126, height: 126)
+                .frame(width: layout.isPad ? 162 : 126, height: layout.isPad ? 162 : 126)
                 .overlay(
                     Image("OnboardingHero")
                         .resizable()
                         .scaledToFill()
-                        .frame(width: 118, height: 118)
+                        .frame(width: layout.isPad ? 152 : 118, height: layout.isPad ? 152 : 118)
                         .clipShape(Circle())
                 )
                 .overlay(
@@ -79,15 +106,15 @@ struct OnboardingView: View {
         .padding(.top, MMSpacing.lg)
     }
 
-    private var intro: some View {
+    private func intro(layout: MMLayoutMetrics) -> some View {
         VStack(spacing: 14) {
             Text(t.onboardingWelcomeTitle)
-                .font(.system(size: 38, weight: .bold, design: .serif))
+                .font(.system(size: layout.isPad ? 50 : 38, weight: .bold, design: .serif))
                 .foregroundStyle(.mmTextPrimary)
                 .multilineTextAlignment(.center)
 
             Text(t.onboardingWelcomeBody)
-                .font(.system(size: 16, weight: .regular))
+                .font(.system(size: layout.isPad ? 18 : 16, weight: .regular))
                 .foregroundStyle(.mmTextMuted)
                 .multilineTextAlignment(.center)
                 .lineSpacing(4)
@@ -97,27 +124,27 @@ struct OnboardingView: View {
         .offset(y: appear ? 0 : 18)
     }
 
-    private var featureList: some View {
+    private func featureList(layout: MMLayoutMetrics) -> some View {
         VStack(spacing: MMSpacing.md) {
             ForEach(features, id: \.0) { icon, title, text in
-                MMCard(padding: MMSpacing.lg, cornerRadius: MMRadius.md) {
+                MMCard(padding: layout.cardPadding, cornerRadius: MMRadius.md) {
                     HStack(alignment: .top, spacing: MMSpacing.md) {
                         RoundedRectangle(cornerRadius: 16, style: .continuous)
                             .fill(Color.mmSurface)
-                            .frame(width: 46, height: 46)
+                            .frame(width: layout.isPad ? 52 : 46, height: layout.isPad ? 52 : 46)
                             .overlay(
                                 Image(systemName: icon)
-                                    .font(.system(size: 18, weight: .semibold))
+                                    .font(.system(size: layout.isPad ? 20 : 18, weight: .semibold))
                                     .foregroundStyle(.mmAccent)
                             )
 
                         VStack(alignment: .leading, spacing: 6) {
                             Text(title)
-                                .font(.system(size: 15, weight: .semibold))
+                                .font(.system(size: layout.isPad ? 17 : 15, weight: .semibold))
                                 .foregroundStyle(.mmTextPrimary)
 
                             Text(text)
-                                .font(.system(size: 13))
+                                .font(.system(size: layout.isPad ? 14 : 13))
                                 .foregroundStyle(.mmTextMuted)
                                 .lineSpacing(3)
                         }
@@ -130,7 +157,7 @@ struct OnboardingView: View {
         .opacity(appear ? 1 : 0)
     }
 
-    private var actions: some View {
+    private func actions(layout: MMLayoutMetrics) -> some View {
         VStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 10) {
                 MMSectionLabel(text: t.onboardingYourName)
@@ -161,6 +188,7 @@ struct OnboardingView: View {
             .disabled(normalizedName.isEmpty)
             .opacity(normalizedName.isEmpty ? 0.48 : 1)
         }
+        .frame(maxWidth: layout.formContentWidth, alignment: .center)
         .opacity(appear ? 1 : 0)
     }
 

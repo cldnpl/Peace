@@ -196,20 +196,23 @@ struct StatCard: View {
     let value: String
     let label: String
     var color: Color = .mmTextPrimary
+    var isPadLayout = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(value)
-                .font(MMFont.display(30, weight: .bold))
+                .font(MMFont.display(isPadLayout ? 34 : 30, weight: .bold))
                 .foregroundStyle(color)
+                .minimumScaleFactor(0.75)
+                .lineLimit(1)
 
             Text(label)
-                .font(MMFont.caption(12, weight: .medium))
+                .font(MMFont.caption(isPadLayout ? 13 : 12, weight: .medium))
                 .foregroundStyle(.mmTextMuted)
                 .fixedSize(horizontal: false, vertical: true)
         }
-        .frame(maxWidth: .infinity, minHeight: 116, alignment: .topLeading)
-        .padding(MMSpacing.lg)
+        .frame(maxWidth: .infinity, minHeight: isPadLayout ? 128 : 116, alignment: .topLeading)
+        .padding(isPadLayout ? 22 : MMSpacing.lg)
         .background(
             RoundedRectangle(cornerRadius: MMRadius.md, style: .continuous)
                 .fill(Color.mmCard)

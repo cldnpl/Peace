@@ -3,6 +3,7 @@ import SwiftUI
 struct HomeView: View {
     @StateObject private var vm = HomeViewModel()
     @EnvironmentObject private var languageStore: AppLanguageStore
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @State private var expandedNoteEntryID: UUID?
     @State private var contentHeight: CGFloat = 0
 
@@ -16,18 +17,29 @@ struct HomeView: View {
                 AmbientBackground()
 
                 GeometryReader { proxy in
+                    let layout = MMLayoutMetrics(size: proxy.size, horizontalSizeClass: horizontalSizeClass)
                     let verticalInset = min(
                         max(MMSpacing.lg, (proxy.size.height - contentHeight) / 2),
-                        MMSpacing.xxxl
+                        layout.isPad ? 64 : MMSpacing.xxxl
                     )
 
                     ScrollView(showsIndicators: false) {
-                        VStack(alignment: .leading, spacing: MMSpacing.xl) {
-                            greetingBlock
+                        VStack(alignment: .leading, spacing: layout.sectionSpacing) {
+                            greetingBlock(layout: layout)
 
-                            VStack(alignment: .leading, spacing: MMSpacing.xl) {
-                                overviewCard
-                                moodCard
+                            if layout.prefersSplitLayout {
+                                HStack(alignment: .top, spacing: layout.sectionSpacing) {
+                                    overviewCard(layout: layout)
+                                        .frame(maxWidth: .infinity, alignment: .topLeading)
+
+                                    moodCard(layout: layout)
+                                        .frame(maxWidth: .infinity, alignment: .topLeading)
+                                }
+                            } else {
+                                VStack(alignment: .leading, spacing: layout.sectionSpacing) {
+                                    overviewCard(layout: layout)
+                                    moodCard(layout: layout)
+                                }
                             }
                         }
                         .background(
@@ -36,11 +48,12 @@ struct HomeView: View {
                                     .preference(key: HomeContentHeightPreferenceKey.self, value: contentProxy.size.height)
                             }
                         )
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .frame(maxWidth: layout.screenContentWidth, alignment: .leading)
+                        .frame(maxWidth: .infinity, alignment: .center)
                         .padding(.top, verticalInset)
                         .padding(.bottom, MMSpacing.xl)
                     }
-                    .safeAreaPadding(.horizontal, MMSpacing.md)
+                    .safeAreaPadding(.horizontal, layout.horizontalPadding)
                     .safeAreaPadding(.bottom, MMSpacing.sm)
                     .onPreferenceChange(HomeContentHeightPreferenceKey.self) { contentHeight = $0 }
                 }
@@ -50,48 +63,48 @@ struct HomeView: View {
         }
     }
 
-    private var greetingBlock: some View {
+    private func greetingBlock(layout: MMLayoutMetrics) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(vm.greetingLine(language: languageStore.selectedLanguage))
-                .font(MMFont.display(26, weight: .bold))
+                .font(MMFont.display(layout.isPad ? 34 : 26, weight: .bold))
                 .foregroundStyle(.mmTextPrimary)
 
             Text(t.homeSubtitle)
-                .font(MMFont.body(14))
+                .font(MMFont.body(layout.isPad ? 16 : 14))
                 .foregroundStyle(.mmTextMuted)
                 .lineSpacing(3)
         }
         .padding(.bottom, MMSpacing.md)
     }
 
-    private var overviewCard: some View {
-        MMCard(padding: MMSpacing.lg, cornerRadius: MMRadius.md, borderColor: Color.mmAccent.opacity(0.14), backgroundColor: Color.mmCard.opacity(0.92)) {
+    private func overviewCard(layout: MMLayoutMetrics) -> some View {
+        MMCard(padding: layout.cardPadding, cornerRadius: MMRadius.md, borderColor: Color.mmAccent.opacity(0.14), backgroundColor: Color.mmCard.opacity(0.92)) {
             VStack(alignment: .leading, spacing: MMSpacing.md) {
                 MMSectionLabel(text: t.summarySection)
 
                 Text(vm.dailyTitle(language: languageStore.selectedLanguage))
-                    .font(MMFont.display(22, weight: .bold))
+                    .font(MMFont.display(layout.isPad ? 28 : 22, weight: .bold))
                     .foregroundStyle(.mmTextPrimary)
 
                 Text(vm.dailyMessage(language: languageStore.selectedLanguage))
-                    .font(MMFont.body(13))
+                    .font(MMFont.body(layout.isPad ? 15 : 13))
                     .foregroundStyle(.mmTextMuted)
                     .lineSpacing(3)
 
                 Spacer(minLength: 0)
             }
-            .frame(maxWidth: .infinity, minHeight: 164, alignment: .topLeading)
+            .frame(maxWidth: .infinity, minHeight: layout.cardMinHeight, alignment: .topLeading)
         }
     }
 
-    private var moodCard: some View {
-        MMCard(padding: MMSpacing.lg, cornerRadius: MMRadius.md, backgroundColor: Color.mmCard.opacity(0.88)) {
+    private func moodCard(layout: MMLayoutMetrics) -> some View {
+        MMCard(padding: layout.cardPadding, cornerRadius: MMRadius.md, backgroundColor: Color.mmCard.opacity(0.88)) {
             VStack(alignment: .leading, spacing: MMSpacing.md) {
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
                         MMSectionLabel(text: t.trendSection)
                         Text(t.lastSevenDays)
-                            .font(MMFont.title(18, weight: .semibold))
+                            .font(MMFont.title(layout.isPad ? 22 : 18, weight: .semibold))
                             .foregroundStyle(.mmTextPrimary)
                     }
 
@@ -107,15 +120,15 @@ struct HomeView: View {
                         VStack(spacing: 8) {
                             RoundedRectangle(cornerRadius: 12, style: .continuous)
                                 .fill((item.entry?.mood.color ?? Color.mmSurface).opacity(item.entry == nil ? 0.45 : 0.14))
-                                .frame(width: 34, height: 34)
+                                .frame(width: layout.isPad ? 42 : 34, height: layout.isPad ? 42 : 34)
                                 .overlay(
                                     Image(systemName: item.entry?.mood.symbolName ?? "minus")
-                                        .font(.system(size: 13, weight: .semibold))
+                                        .font(.system(size: layout.isPad ? 15 : 13, weight: .semibold))
                                         .foregroundStyle(item.entry?.mood.color ?? .mmTextDim)
                                 )
 
                             Text(item.day)
-                                .font(MMFont.caption(10, weight: .medium))
+                                .font(MMFont.caption(layout.isPad ? 11 : 10, weight: .medium))
                                 .foregroundStyle(.mmTextDim)
 
                             if hasNote(for: item.entry) {
@@ -123,7 +136,7 @@ struct HomeView: View {
                                     toggleNote(for: item.entry)
                                 } label: {
                                     Text(t.notePill)
-                                        .font(MMFont.caption(9, weight: .semibold))
+                                        .font(MMFont.caption(layout.isPad ? 10 : 9, weight: .semibold))
                                         .foregroundStyle(expandedNoteEntryID == item.entry?.id ? Color.white : (item.entry?.mood.color ?? .mmAccent))
                                         .padding(.horizontal, 8)
                                         .padding(.vertical, 4)
@@ -143,7 +156,7 @@ struct HomeView: View {
                                 .buttonStyle(.plain)
                             } else {
                                 Color.clear
-                                    .frame(height: 21)
+                                    .frame(height: layout.isPad ? 23 : 21)
                             }
                         }
                         .frame(maxWidth: .infinity)
@@ -181,13 +194,13 @@ struct HomeView: View {
                         }
 
                         Text(selectedNote.entry.note.trimmingCharacters(in: .whitespacesAndNewlines))
-                            .font(MMFont.body(13))
+                            .font(MMFont.body(layout.isPad ? 14 : 13))
                             .foregroundStyle(.mmTextMuted)
                             .lineSpacing(3)
                             .fixedSize(horizontal: false, vertical: true)
                     }
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 12)
+                    .padding(.horizontal, layout.isPad ? 18 : 14)
+                    .padding(.vertical, layout.isPad ? 16 : 12)
                     .background(
                         RoundedRectangle(cornerRadius: 18, style: .continuous)
                             .fill(Color.mmSurface.opacity(0.9))
@@ -201,7 +214,7 @@ struct HomeView: View {
 
                 Spacer(minLength: 0)
             }
-            .frame(maxWidth: .infinity, minHeight: 164, alignment: .topLeading)
+            .frame(maxWidth: .infinity, minHeight: layout.cardMinHeight, alignment: .topLeading)
         }
     }
 

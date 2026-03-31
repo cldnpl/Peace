@@ -3,6 +3,7 @@ import SwiftUI
 struct AISupportChatView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var languageStore: AppLanguageStore
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @StateObject private var vm = AISupportChatViewModel()
 
     private var t: AppStrings {
@@ -14,38 +15,44 @@ struct AISupportChatView: View {
             ZStack(alignment: .bottom) {
                 AmbientBackground()
 
-                VStack(spacing: 0) {
-                    safetyBanner
+                GeometryReader { proxy in
+                    let layout = MMLayoutMetrics(size: proxy.size, horizontalSizeClass: horizontalSizeClass)
 
-                    ScrollViewReader { proxy in
-                        ScrollView(showsIndicators: false) {
-                            VStack(alignment: .leading, spacing: MMSpacing.lg) {
-                                recentSessionsStrip
-                                quickPromptStrip
+                    VStack(spacing: 0) {
+                        safetyBanner(layout: layout)
 
-                                ForEach(vm.messages) { message in
-                                    messageBubble(message)
-                                        .id(message.id)
+                        ScrollViewReader { proxy in
+                            ScrollView(showsIndicators: false) {
+                                VStack(alignment: .leading, spacing: MMSpacing.lg) {
+                                    recentSessionsStrip(layout: layout)
+                                    quickPromptStrip(layout: layout)
+
+                                    ForEach(vm.messages) { message in
+                                        messageBubble(message, layout: layout)
+                                            .id(message.id)
+                                    }
+
+                                    if vm.isProcessing {
+                                        typingBubble(layout: layout)
+                                    }
                                 }
-
-                                if vm.isProcessing {
-                                    typingBubble
-                                }
+                                .frame(maxWidth: layout.readingContentWidth, alignment: .leading)
+                                .frame(maxWidth: .infinity, alignment: .center)
+                                .padding(.horizontal, layout.horizontalPadding)
+                                .padding(.top, MMSpacing.lg)
+                                .padding(.bottom, 120)
                             }
-                            .padding(.horizontal, MMSpacing.lg)
-                            .padding(.top, MMSpacing.lg)
-                            .padding(.bottom, 120)
+                            .onChange(of: vm.messages.count) { _, _ in
+                                scrollToLatest(using: proxy)
+                            }
+                            .onChange(of: vm.isProcessing) { _, _ in
+                                scrollToLatest(using: proxy)
+                            }
                         }
-                        .onChange(of: vm.messages.count) { _, _ in
-                            scrollToLatest(using: proxy)
-                        }
-                        .onChange(of: vm.isProcessing) { _, _ in
-                            scrollToLatest(using: proxy)
-                        }
+
+                        composer(layout: layout)
                     }
                 }
-
-                composer
             }
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.hidden, for: .navigationBar)
@@ -69,7 +76,7 @@ struct AISupportChatView: View {
         }
     }
 
-    private var safetyBanner: some View {
+    private func safetyBanner(layout: MMLayoutMetrics) -> some View {
         MMCard(
             padding: MMSpacing.md,
             cornerRadius: MMRadius.md,
@@ -82,17 +89,19 @@ struct AISupportChatView: View {
                     .foregroundStyle(.mmAmber)
 
                 Text(t.supportChatSafety)
-                    .font(MMFont.body(13))
+                    .font(MMFont.body(layout.isPad ? 14 : 13))
                     .foregroundStyle(.mmTextMuted)
                     .lineSpacing(3)
             }
         }
-        .padding(.horizontal, MMSpacing.lg)
+        .frame(maxWidth: layout.readingContentWidth)
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, layout.horizontalPadding)
         .padding(.top, MMSpacing.md)
     }
 
     @ViewBuilder
-    private var recentSessionsStrip: some View {
+    private func recentSessionsStrip(layout: MMLayoutMetrics) -> some View {
         if !vm.recentSessions.isEmpty {
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
@@ -138,7 +147,7 @@ struct AISupportChatView: View {
                                 }
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 12)
-                                .frame(width: 188, alignment: .leading)
+                                .frame(width: layout.isPad ? 220 : 188, alignment: .leading)
                                 .background(
                                     RoundedRectangle(cornerRadius: 18, style: .continuous)
                                         .fill(Color.mmCard.opacity(0.92))
@@ -161,7 +170,7 @@ struct AISupportChatView: View {
         }
     }
 
-    private var quickPromptStrip: some View {
+    private func quickPromptStrip(layout: MMLayoutMetrics) -> some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 10) {
                 ForEach(vm.quickPrompts, id: \.self) { prompt in
@@ -190,33 +199,34 @@ struct AISupportChatView: View {
     }
 
     @ViewBuilder
-    private func messageBubble(_ message: SupportChatMessage) -> some View {
+    private func messageBubble(_ message: SupportChatMessage, layout: MMLayoutMetrics) -> some View {
         HStack {
             if message.role == .assistant {
-                bubble(message.text, isAssistant: true)
+                bubble(message.text, isAssistant: true, layout: layout)
                 Spacer(minLength: 40)
             } else {
                 Spacer(minLength: 40)
-                bubble(message.text, isAssistant: false)
+                bubble(message.text, isAssistant: false, layout: layout)
             }
         }
     }
 
-    private var typingBubble: some View {
+    private func typingBubble(layout: MMLayoutMetrics) -> some View {
         HStack {
-            bubble(t.supportTyping, isAssistant: true)
+            bubble(t.supportTyping, isAssistant: true, layout: layout)
             Spacer(minLength: 40)
         }
         .transition(.opacity)
     }
 
-    private func bubble(_ text: String, isAssistant: Bool) -> some View {
+    private func bubble(_ text: String, isAssistant: Bool, layout: MMLayoutMetrics) -> some View {
         Text(text)
-            .font(MMFont.body(14))
+            .font(MMFont.body(layout.isPad ? 15 : 14))
             .foregroundStyle(isAssistant ? .mmTextPrimary : Color.white)
             .lineSpacing(4)
             .padding(.horizontal, 14)
             .padding(.vertical, 12)
+            .frame(maxWidth: layout.messageBubbleWidth, alignment: .leading)
             .background(
                 RoundedRectangle(cornerRadius: 20, style: .continuous)
                     .fill(isAssistant ? Color.mmCard.opacity(0.96) : Color.mmAccent)
@@ -227,7 +237,7 @@ struct AISupportChatView: View {
             )
     }
 
-    private var composer: some View {
+    private func composer(layout: MMLayoutMetrics) -> some View {
         VStack(spacing: 10) {
             Divider()
                 .overlay(Color.mmBorder)
@@ -255,10 +265,12 @@ struct AISupportChatView: View {
                         .font(.system(size: 30, weight: .semibold))
                         .foregroundStyle(vm.draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? .mmTextDim : .mmAccent)
                 }
-                .buttonStyle(.plain)
-                .disabled(vm.draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || vm.isProcessing)
+                    .buttonStyle(.plain)
+                    .disabled(vm.draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || vm.isProcessing)
             }
-            .padding(.horizontal, MMSpacing.lg)
+            .frame(maxWidth: layout.readingContentWidth, alignment: .center)
+            .frame(maxWidth: .infinity)
+            .padding(.horizontal, layout.horizontalPadding)
             .padding(.bottom, MMSpacing.md)
             .padding(.top, 10)
             .background(.ultraThinMaterial)

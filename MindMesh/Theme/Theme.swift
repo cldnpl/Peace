@@ -208,3 +208,82 @@ enum MMRadius {
     static let xl: CGFloat = 30
     static let pill: CGFloat = 100
 }
+
+struct MMLayoutMetrics {
+    let size: CGSize
+    let horizontalSizeClass: UserInterfaceSizeClass?
+
+    var isPad: Bool {
+        UIDevice.current.userInterfaceIdiom == .pad || size.width >= 700
+    }
+
+    var prefersSplitLayout: Bool {
+        size.width >= 900
+    }
+
+    var prefersWideGrid: Bool {
+        size.width >= 820
+    }
+
+    var horizontalPadding: CGFloat {
+        if size.width >= 1100 {
+            return 40
+        }
+
+        return isPad ? 32 : MMSpacing.lg
+    }
+
+    var sectionSpacing: CGFloat {
+        isPad ? MMSpacing.xxl : MMSpacing.xl
+    }
+
+    var cardPadding: CGFloat {
+        isPad ? 28 : MMSpacing.lg
+    }
+
+    var headerTopPadding: CGFloat {
+        isPad ? 56 : MMSpacing.xxxl
+    }
+
+    var screenContentWidth: CGFloat {
+        guard isPad else { return .infinity }
+        return min(size.width - (horizontalPadding * 2), prefersSplitLayout ? 1120 : 920)
+    }
+
+    var formContentWidth: CGFloat {
+        guard isPad else { return .infinity }
+        return min(size.width - (horizontalPadding * 2), 720)
+    }
+
+    var readingContentWidth: CGFloat {
+        guard isPad else { return .infinity }
+        return min(size.width - (horizontalPadding * 2), 820)
+    }
+
+    var modalContentWidth: CGFloat {
+        guard isPad else { return .infinity }
+        return min(size.width - (horizontalPadding * 2), 760)
+    }
+
+    var messageBubbleWidth: CGFloat {
+        if prefersSplitLayout {
+            return 520
+        }
+
+        return isPad ? 440 : 320
+    }
+
+    var cardMinHeight: CGFloat {
+        isPad ? 188 : 164
+    }
+
+    var compactStatColumns: [GridItem] {
+        let columnCount = 2
+        return Array(repeating: GridItem(.flexible(), spacing: MMSpacing.md), count: columnCount)
+    }
+
+    var moodGridColumns: [GridItem] {
+        let columnCount = prefersWideGrid ? 3 : 2
+        return Array(repeating: GridItem(.flexible(), spacing: MMSpacing.md), count: columnCount)
+    }
+}

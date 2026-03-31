@@ -9,6 +9,7 @@ struct AIInsightsView: View {
     @StateObject private var vm = AIInsightsViewModel()
     @EnvironmentObject private var languageStore: AppLanguageStore
     @EnvironmentObject private var premiumStore: PremiumStore
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @State private var showPremiumSheet = false
     @State private var showSupportChat = false
 
@@ -25,25 +26,51 @@ struct AIInsightsView: View {
             ZStack {
                 AmbientBackground()
 
-                ScrollView(showsIndicators: false) {
-                    VStack(alignment: .leading, spacing: 0) {
-                        MMNavigationHeaderBlock(text: t.insightsTitle, topPadding: MMSpacing.xxxl)
+                GeometryReader { proxy in
+                    let layout = MMLayoutMetrics(size: proxy.size, horizontalSizeClass: horizontalSizeClass)
 
-                        VStack(alignment: .leading, spacing: MMSpacing.xl) {
-                            if let snapshot = vm.snapshot {
-                                reflectionCard(snapshot: snapshot)
-                                overviewCard(snapshot: snapshot)
-                                detailCard(snapshot: snapshot)
-                                premiumCard(snapshot: snapshot)
-                            } else {
-                                emptyState
+                    ScrollView(showsIndicators: false) {
+                        VStack(alignment: .leading, spacing: 0) {
+                            MMNavigationHeaderBlock(
+                                text: t.insightsTitle,
+                                topPadding: layout.headerTopPadding,
+                                bottomPadding: layout.isPad ? MMSpacing.xl : MMSpacing.md
+                            )
+
+                            VStack(alignment: .leading, spacing: layout.sectionSpacing) {
+                                if let snapshot = vm.snapshot {
+                                    if layout.prefersSplitLayout {
+                                        HStack(alignment: .top, spacing: layout.sectionSpacing) {
+                                            VStack(alignment: .leading, spacing: layout.sectionSpacing) {
+                                                reflectionCard(snapshot: snapshot, layout: layout)
+                                                overviewCard(snapshot: snapshot, layout: layout)
+                                            }
+                                            .frame(maxWidth: .infinity, alignment: .topLeading)
+
+                                            VStack(alignment: .leading, spacing: layout.sectionSpacing) {
+                                                detailCard(snapshot: snapshot, layout: layout)
+                                                premiumCard(snapshot: snapshot, layout: layout)
+                                            }
+                                            .frame(maxWidth: .infinity, alignment: .topLeading)
+                                        }
+                                    } else {
+                                        reflectionCard(snapshot: snapshot, layout: layout)
+                                        overviewCard(snapshot: snapshot, layout: layout)
+                                        detailCard(snapshot: snapshot, layout: layout)
+                                        premiumCard(snapshot: snapshot, layout: layout)
+                                    }
+                                } else {
+                                    emptyState(layout: layout)
+                                }
                             }
                         }
+                        .frame(maxWidth: layout.screenContentWidth, alignment: .leading)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .padding(.bottom, 40)
                     }
-                    .padding(.bottom, 40)
+                    .safeAreaPadding(.horizontal, layout.horizontalPadding)
+                    .safeAreaPadding(.bottom, MMSpacing.md)
                 }
-                .safeAreaPadding(.horizontal, MMSpacing.lg)
-                .safeAreaPadding(.bottom, MMSpacing.md)
             }
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.hidden, for: .navigationBar)
@@ -59,33 +86,33 @@ struct AIInsightsView: View {
         }
     }
 
-    private func reflectionCard(snapshot: MoodReflectionSnapshot) -> some View {
-        MMCard(borderColor: Color.mmAccent.opacity(0.16), backgroundColor: Color.mmCard.opacity(0.92)) {
+    private func reflectionCard(snapshot: MoodReflectionSnapshot, layout: MMLayoutMetrics) -> some View {
+        MMCard(padding: layout.cardPadding, borderColor: Color.mmAccent.opacity(0.16), backgroundColor: Color.mmCard.opacity(0.92)) {
             VStack(alignment: .leading, spacing: MMSpacing.lg) {
                 MMSectionLabel(text: t.last7DaysSection)
 
                 Text(snapshot.title)
-                    .font(MMFont.display(30, weight: .bold))
+                    .font(MMFont.display(layout.isPad ? 36 : 30, weight: .bold))
                     .foregroundStyle(.mmTextPrimary)
 
                 Text(snapshot.message)
-                    .font(MMFont.body(15))
+                    .font(MMFont.body(layout.isPad ? 16 : 15))
                     .foregroundStyle(.mmTextMuted)
                     .lineSpacing(4)
             }
         }
     }
 
-    private func detailCard(snapshot: MoodReflectionSnapshot) -> some View {
-        MMCard {
+    private func detailCard(snapshot: MoodReflectionSnapshot, layout: MMLayoutMetrics) -> some View {
+        MMCard(padding: layout.cardPadding) {
             VStack(alignment: .leading, spacing: MMSpacing.lg) {
                 Text(snapshot.detailTitle)
-                    .font(MMFont.caption(13, weight: .semibold))
+                    .font(MMFont.caption(layout.isPad ? 14 : 13, weight: .semibold))
                     .foregroundStyle(.mmTextMuted)
 
                 HStack(alignment: .firstTextBaseline, spacing: 10) {
                     Text(snapshot.detailValue)
-                        .font(MMFont.display(34, weight: .bold))
+                        .font(MMFont.display(layout.isPad ? 40 : 34, weight: .bold))
                         .foregroundStyle(.mmTextPrimary)
 
                     Image(systemName: "waveform.path.ecg")
@@ -94,35 +121,32 @@ struct AIInsightsView: View {
                 }
 
                 Text(snapshot.detailMessage)
-                    .font(MMFont.body(14))
+                    .font(MMFont.body(layout.isPad ? 15 : 14))
                     .foregroundStyle(.mmTextMuted)
                     .lineSpacing(4)
             }
         }
     }
 
-    private func overviewCard(snapshot: MoodReflectionSnapshot) -> some View {
-        MMCard(backgroundColor: Color.mmCard.opacity(0.9)) {
+    private func overviewCard(snapshot: MoodReflectionSnapshot, layout: MMLayoutMetrics) -> some View {
+        MMCard(padding: layout.cardPadding, backgroundColor: Color.mmCard.opacity(0.9)) {
             VStack(alignment: .leading, spacing: MMSpacing.lg) {
                 MMSectionLabel(text: t.overviewSection)
 
-                HStack(spacing: MMSpacing.md) {
-                    StatCard(value: snapshot.dominantMoodLabel, label: t.mostRecurringMood, color: .mmAccent)
-                    StatCard(value: snapshot.trendLabel, label: t.recentTrend, color: .mmAccent3)
-                }
-
-                HStack(spacing: MMSpacing.md) {
-                    StatCard(value: snapshot.energyLabel, label: t.averageEnergy, color: .mmTeal)
-                    StatCard(value: snapshot.consistencyLabel, label: t.toneVariation, color: .mmRose)
+                LazyVGrid(columns: layout.compactStatColumns, spacing: MMSpacing.md) {
+                    StatCard(value: snapshot.dominantMoodLabel, label: t.mostRecurringMood, color: .mmAccent, isPadLayout: layout.isPad)
+                    StatCard(value: snapshot.trendLabel, label: t.recentTrend, color: .mmAccent3, isPadLayout: layout.isPad)
+                    StatCard(value: snapshot.energyLabel, label: t.averageEnergy, color: .mmTeal, isPadLayout: layout.isPad)
+                    StatCard(value: snapshot.consistencyLabel, label: t.toneVariation, color: .mmRose, isPadLayout: layout.isPad)
                 }
             }
         }
     }
 
     @ViewBuilder
-    private func premiumCard(snapshot: MoodReflectionSnapshot) -> some View {
+    private func premiumCard(snapshot: MoodReflectionSnapshot, layout: MMLayoutMetrics) -> some View {
         if premiumStore.hasPremiumAccess {
-            MMCard(borderColor: Color.mmAccent.opacity(0.18), backgroundColor: Color.mmCard.opacity(0.94)) {
+            MMCard(padding: layout.cardPadding, borderColor: Color.mmAccent.opacity(0.18), backgroundColor: Color.mmCard.opacity(0.94)) {
                 VStack(alignment: .leading, spacing: MMSpacing.lg) {
                     HStack {
                         MMSectionLabel(text: t.fullAnalysis)
@@ -131,11 +155,11 @@ struct AIInsightsView: View {
                     }
 
                     if vm.isGeneratingPremiumAnalysis {
-                        premiumLoadingState
+                        premiumLoadingState(layout: layout)
                     } else if let premiumAnalysis = vm.premiumAnalysis {
-                        premiumAnalysisContent(premiumAnalysis)
+                        premiumAnalysisContent(premiumAnalysis, layout: layout)
                     } else if let premiumAnalysisError = vm.premiumAnalysisError {
-                        premiumAnalysisErrorState(premiumAnalysisError)
+                        premiumAnalysisErrorState(premiumAnalysisError, layout: layout)
                     }
 
                     VStack(spacing: 12) {
@@ -153,12 +177,12 @@ struct AIInsightsView: View {
                 }
             }
         } else {
-            lockedPremiumCard
+            lockedPremiumCard(layout: layout)
         }
     }
 
-    private var lockedPremiumCard: some View {
-        MMCard(borderColor: Color.mmAccent.opacity(0.14), backgroundColor: Color.mmCard.opacity(0.92)) {
+    private func lockedPremiumCard(layout: MMLayoutMetrics) -> some View {
+        MMCard(padding: layout.cardPadding, borderColor: Color.mmAccent.opacity(0.14), backgroundColor: Color.mmCard.opacity(0.92)) {
             VStack(alignment: .leading, spacing: MMSpacing.lg) {
                 HStack {
                     MMSectionLabel(text: t.fullAnalysis)
@@ -168,27 +192,27 @@ struct AIInsightsView: View {
                 }
 
                 Text(t.lockedAnalysisTitle)
-                    .font(MMFont.title(22, weight: .semibold))
+                    .font(MMFont.title(layout.isPad ? 24 : 22, weight: .semibold))
                     .foregroundStyle(.mmTextPrimary)
 
                 Text(t.lockedAnalysisBody)
-                    .font(MMFont.body(14))
+                    .font(MMFont.body(layout.isPad ? 15 : 14))
                     .foregroundStyle(.mmTextMuted)
                     .lineSpacing(4)
 
                 MMCard(
-                    padding: MMSpacing.lg,
+                    padding: layout.isPad ? 22 : MMSpacing.lg,
                     cornerRadius: MMRadius.md,
                     borderColor: Color.mmAccent.opacity(0.14),
                     backgroundColor: Color.mmSurface.opacity(0.76)
                 ) {
                     VStack(alignment: .leading, spacing: 8) {
                         Text(t.includedInPremium)
-                            .font(MMFont.caption(12, weight: .semibold))
+                            .font(MMFont.caption(layout.isPad ? 13 : 12, weight: .semibold))
                             .foregroundStyle(.mmAccent)
 
                         Text(t.premiumBundleDescription)
-                            .font(MMFont.body(14))
+                            .font(MMFont.body(layout.isPad ? 15 : 14))
                             .foregroundStyle(.mmTextPrimary)
                             .lineSpacing(3)
                     }
@@ -201,9 +225,9 @@ struct AIInsightsView: View {
         }
     }
 
-    private var premiumLoadingState: some View {
+    private func premiumLoadingState(layout: MMLayoutMetrics) -> some View {
         MMCard(
-            padding: MMSpacing.lg,
+            padding: layout.isPad ? 22 : MMSpacing.lg,
             cornerRadius: MMRadius.md,
             borderColor: Color.mmAccent.opacity(0.14),
             backgroundColor: Color.mmSurface.opacity(0.76)
@@ -213,22 +237,22 @@ struct AIInsightsView: View {
                     .tint(.mmAccent)
 
                 Text(t.premiumLoadingTitle)
-                    .font(MMFont.title(18, weight: .semibold))
+                    .font(MMFont.title(layout.isPad ? 20 : 18, weight: .semibold))
                     .foregroundStyle(.mmTextPrimary)
 
                 Text(t.premiumLoadingBody)
-                    .font(MMFont.body(14))
+                    .font(MMFont.body(layout.isPad ? 15 : 14))
                     .foregroundStyle(.mmTextMuted)
                     .lineSpacing(3)
             }
         }
     }
 
-    private func premiumAnalysisContent(_ premiumAnalysis: PremiumEmotionalAnalysis) -> some View {
+    private func premiumAnalysisContent(_ premiumAnalysis: PremiumEmotionalAnalysis, layout: MMLayoutMetrics) -> some View {
         VStack(alignment: .leading, spacing: MMSpacing.lg) {
             VStack(alignment: .leading, spacing: 8) {
                 Text(premiumAnalysis.title)
-                    .font(MMFont.title(24, weight: .semibold))
+                    .font(MMFont.title(layout.isPad ? 26 : 24, weight: .semibold))
                     .foregroundStyle(.mmTextPrimary)
 
                 Text(t.premiumGeneratedAt(premiumAnalysis.generatedAt.formatted(date: .abbreviated, time: .shortened)))
@@ -237,13 +261,13 @@ struct AIInsightsView: View {
             }
 
             MMCard(
-                padding: MMSpacing.lg,
+                padding: layout.isPad ? 22 : MMSpacing.lg,
                 cornerRadius: MMRadius.md,
                 borderColor: Color.mmAccent2.opacity(0.18),
                 backgroundColor: Color.mmSurface.opacity(0.72)
             ) {
                 Text(premiumAnalysis.content)
-                    .font(MMFont.body(14))
+                    .font(MMFont.body(layout.isPad ? 15 : 14))
                     .foregroundStyle(.mmTextPrimary)
                     .lineSpacing(4)
                     .fixedSize(horizontal: false, vertical: true)
@@ -251,52 +275,52 @@ struct AIInsightsView: View {
         }
     }
 
-    private func premiumAnalysisErrorState(_ message: String) -> some View {
+    private func premiumAnalysisErrorState(_ message: String, layout: MMLayoutMetrics) -> some View {
         MMCard(
-            padding: MMSpacing.lg,
+            padding: layout.isPad ? 22 : MMSpacing.lg,
             cornerRadius: MMRadius.md,
             borderColor: Color.mmRose.opacity(0.18),
             backgroundColor: Color.mmRose.opacity(0.08)
         ) {
             VStack(alignment: .leading, spacing: 10) {
                 Text(t.premiumAnalysisUnavailable)
-                    .font(MMFont.title(18, weight: .semibold))
+                    .font(MMFont.title(layout.isPad ? 20 : 18, weight: .semibold))
                     .foregroundStyle(.mmTextPrimary)
 
                 Text(message)
-                    .font(MMFont.body(14))
+                    .font(MMFont.body(layout.isPad ? 15 : 14))
                     .foregroundStyle(.mmTextMuted)
                     .lineSpacing(3)
             }
         }
     }
 
-    private var emptyState: some View {
+    private func emptyState(layout: MMLayoutMetrics) -> some View {
         VStack(alignment: .leading, spacing: MMSpacing.xxxl) {
-            MMCard(borderColor: Color.mmAccent.opacity(0.14), backgroundColor: Color.mmCard.opacity(0.92)) {
+            MMCard(padding: layout.cardPadding, borderColor: Color.mmAccent.opacity(0.14), backgroundColor: Color.mmCard.opacity(0.92)) {
                 VStack(alignment: .leading, spacing: MMSpacing.lg) {
                     RoundedRectangle(cornerRadius: 20, style: .continuous)
                         .fill(Color.mmSurface)
-                        .frame(width: 56, height: 56)
+                        .frame(width: layout.isPad ? 64 : 56, height: layout.isPad ? 64 : 56)
                         .overlay(
                             Image(systemName: "quote.bubble")
-                                .font(.system(size: 24, weight: .semibold))
+                                .font(.system(size: layout.isPad ? 28 : 24, weight: .semibold))
                                 .foregroundStyle(.mmAccent)
                         )
 
                     Text(t.notEnoughDataTitle)
-                        .font(MMFont.display(28, weight: .bold))
+                        .font(MMFont.display(layout.isPad ? 34 : 28, weight: .bold))
                         .foregroundStyle(.mmTextPrimary)
 
                     Text(t.notEnoughDataBody)
-                        .font(MMFont.body(15))
+                        .font(MMFont.body(layout.isPad ? 16 : 15))
                         .foregroundStyle(.mmTextMuted)
                         .lineSpacing(4)
                 }
             }
 
             if !premiumStore.hasPremiumAccess {
-                lockedPremiumCard
+                lockedPremiumCard(layout: layout)
             }
         }
     }
