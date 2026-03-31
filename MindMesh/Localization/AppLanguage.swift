@@ -73,7 +73,7 @@ enum AppLanguage: String, CaseIterable, Identifiable {
         if lowered.hasPrefix("nb") || lowered.hasPrefix("nn") || lowered.hasPrefix("no") { return .norwegian }
         if lowered.hasPrefix("sv") { return .swedish }
 
-        return .italian
+        return .english
     }
 }
 
