@@ -8,10 +8,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -20,9 +16,10 @@ import com.claudian.peace.ui.theme.PeaceTheme
 
 @Composable
 fun OnboardingScreen(
+    draftName: String,
+    onNameChange: (String) -> Unit,
     onContinue: () -> Unit
 ) {
-    var draftName by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
@@ -35,12 +32,12 @@ fun OnboardingScreen(
 
         OutlinedTextField(
             value = draftName,
-            onValueChange = { draftName = it },
+            onValueChange = onNameChange,
             label = { Text("Your Name") }
         )
         Button(
             onClick = onContinue,
-            enabled = draftName.isNotBlank()
+            enabled = draftName.trim().isNotEmpty()
         ) {
             Text("Continue")
         }
@@ -51,6 +48,10 @@ fun OnboardingScreen(
 @Composable
 fun OnboardingScreenPreview() {
     PeaceTheme {
-        OnboardingScreen(onContinue = {})
+        OnboardingScreen(
+            draftName = "",
+            onNameChange = {},
+            onContinue = {}
+        )
     }
 }
