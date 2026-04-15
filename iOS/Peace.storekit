@@ -41,7 +41,7 @@
               "locale" : "en_US"
             }
           ],
-          "productID" : "com.claudianapolitano.mindmesh.premium.monthly",
+          "productID" : "com.claudia.peace.monthly",
           "recurringSubscriptionPeriod" : "P1M",
           "referenceName" : "Peace Premium Monthly",
           "subscriptionGroupID" : "20010001",

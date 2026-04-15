@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct EmotionTrackerView: View {
+struct MoodView: View {
     @StateObject private var vm = EmotionViewModel()
     @EnvironmentObject private var languageStore: AppLanguageStore
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
@@ -195,6 +195,12 @@ struct EmotionTrackerView: View {
                 .frame(height: layout.isPad ? 152 : 128)
             }
         }
+    }
+}
+
+struct EmotionTrackerView: View {
+    var body: some View {
+        MoodView()
     }
 }
 

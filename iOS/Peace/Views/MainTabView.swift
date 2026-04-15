@@ -16,13 +16,13 @@ struct MainTabView: View {
                 }
                 .tag(0)
 
-            EmotionTrackerView()
+            MoodView()
                 .tabItem {
                     Label(t.tabMood, systemImage: selectedTab == 1 ? "heart.fill" : "heart")
                 }
                 .tag(1)
 
-            AIInsightsView()
+            InsightsView()
                 .tabItem {
                     Label(t.tabInsights, systemImage: selectedTab == 2 ? "quote.bubble.fill" : "quote.bubble")
                 }

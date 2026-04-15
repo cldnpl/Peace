@@ -27,6 +27,11 @@
 		AB0000000000000000000039 /* PremiumStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000040 /* PremiumStore.swift */; };
 		AB0000000000000000000042 /* AppLanguage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000041 /* AppLanguage.swift */; };
 		AB0000000000000000000043 /* privacy.html in Resources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000044 /* privacy.html */; };
+		AB0000000000000000000045 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000046 /* SettingsView.swift */; };
+		AB0000000000000000000047 /* PremiumSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000048 /* PremiumSheet.swift */; };
+		AB0000000000000000000049 /* PrivacyPolicyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000050 /* PrivacyPolicyView.swift */; };
+		AB0000000000000000000051 /* AIInsightsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000052 /* AIInsightsViewModel.swift */; };
+		AB0000000000000000000053 /* InsightsModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000054 /* InsightsModels.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -51,6 +56,11 @@
 		AB0000000000000000000040 /* PremiumStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PremiumStore.swift; sourceTree = "<group>"; };
 		AB0000000000000000000041 /* AppLanguage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLanguage.swift; sourceTree = "<group>"; };
 		AB0000000000000000000044 /* privacy.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = privacy.html; sourceTree = SOURCE_ROOT; };
+		AB0000000000000000000046 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		AB0000000000000000000048 /* PremiumSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PremiumSheet.swift; sourceTree = "<group>"; };
+		AB0000000000000000000050 /* PrivacyPolicyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyPolicyView.swift; sourceTree = "<group>"; };
+		AB0000000000000000000052 /* AIInsightsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIInsightsViewModel.swift; sourceTree = "<group>"; };
+		AB0000000000000000000054 /* InsightsModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightsModels.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -93,7 +103,8 @@
 				AB0000000000000000000029 /* Assets.xcassets */,
 				AB0000000000000000000044 /* privacy.html */,
 			);
-			path = MindMesh;
+			name = MindMesh;
+			path = Peace;
 			sourceTree = "<group>";
 		};
 		AA0000000000000000000016 /* Theme */ = {
@@ -104,18 +115,11 @@
 			path = Theme;
 			sourceTree = "<group>";
 		};
-		AA0000000000000000000027 /* Localization */ = {
-			isa = PBXGroup;
-			children = (
-				AB0000000000000000000041 /* AppLanguage.swift */,
-			);
-			path = Localization;
-			sourceTree = "<group>";
-		};
 		AA0000000000000000000017 /* Models */ = {
 			isa = PBXGroup;
 			children = (
 				AB0000000000000000000005 /* Models.swift */,
+				AB0000000000000000000054 /* InsightsModels.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -127,6 +131,7 @@
 				AB0000000000000000000011 /* EmotionViewModel.swift */,
 				AB0000000000000000000032 /* ReminderViewModel.swift */,
 				AB0000000000000000000038 /* AISupportChatService.swift */,
+				AB0000000000000000000052 /* AIInsightsViewModel.swift */,
 				AB0000000000000000000034 /* AISupportChatViewModel.swift */,
 				AB0000000000000000000040 /* PremiumStore.swift */,
 			);
@@ -149,6 +154,7 @@
 				AA0000000000000000000022 /* Home */,
 				AA0000000000000000000024 /* EmotionTracker */,
 				AA0000000000000000000025 /* AIInsights */,
+				AA0000000000000000000028 /* Settings */,
 				AA0000000000000000000026 /* Profile */,
 			);
 			path = Views;
@@ -193,6 +199,24 @@
 				AB0000000000000000000027 /* ProfileView.swift */,
 			);
 			path = Profile;
+			sourceTree = "<group>";
+		};
+		AA0000000000000000000027 /* Localization */ = {
+			isa = PBXGroup;
+			children = (
+				AB0000000000000000000041 /* AppLanguage.swift */,
+			);
+			path = Localization;
+			sourceTree = "<group>";
+		};
+		AA0000000000000000000028 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				AB0000000000000000000046 /* SettingsView.swift */,
+				AB0000000000000000000048 /* PremiumSheet.swift */,
+				AB0000000000000000000050 /* PrivacyPolicyView.swift */,
+			);
+			path = Settings;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -271,8 +295,10 @@
 				AB0000000000000000000006 /* Models.swift in Sources */,
 				AB0000000000000000000008 /* HomeViewModel.swift in Sources */,
 				AB0000000000000000000012 /* EmotionViewModel.swift in Sources */,
+				AB0000000000000000000053 /* InsightsModels.swift in Sources */,
 				AB0000000000000000000031 /* ReminderViewModel.swift in Sources */,
 				AB0000000000000000000037 /* AISupportChatService.swift in Sources */,
+				AB0000000000000000000051 /* AIInsightsViewModel.swift in Sources */,
 				AB0000000000000000000033 /* AISupportChatViewModel.swift in Sources */,
 				AB0000000000000000000039 /* PremiumStore.swift in Sources */,
 				AB0000000000000000000014 /* SharedComponents.swift in Sources */,
@@ -283,6 +309,9 @@
 				AB0000000000000000000026 /* AIInsightsView.swift in Sources */,
 				AB0000000000000000000035 /* AISupportChatView.swift in Sources */,
 				AB0000000000000000000028 /* ProfileView.swift in Sources */,
+				AB0000000000000000000045 /* SettingsView.swift in Sources */,
+				AB0000000000000000000047 /* PremiumSheet.swift in Sources */,
+				AB0000000000000000000049 /* PrivacyPolicyView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -357,9 +386,10 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -393,9 +423,10 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};

@@ -179,7 +179,7 @@ final class AISupportChatViewModel: ObservableObject {
 }
 
 @MainActor
-private final class AISupportChatHistoryStore {
+final class AISupportChatHistoryStore {
     static let shared = AISupportChatHistoryStore()
 
     private let storageKey = "mindmesh.ai.support.chat.history"
