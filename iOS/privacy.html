@@ -115,14 +115,16 @@
     <section class="hero">
       <div class="eyebrow">Peace Privacy Policy</div>
       <h1>Your data should feel private because it is.</h1>
-      <p><strong>Last updated:</strong> March 30, 2026</p>
+      <p><strong>Last updated:</strong> September 25, 2026</p>
       <p>
         Peace is designed to help you track mood patterns, keep short notes, and access premium
         reflections without turning your emotional data into advertising inventory.
       </p>
       <p class="highlight">
         Core mood entries, notes, and recent chat history are stored locally on your device.
-        Premium emotional analysis is intended to run on Apple Foundation Models when available.
+        The AI chat runs on-device with Apple Intelligence when available. Only if it is not
+        available, and only after you give permission in the app, chat messages are sent to
+        Google Gemini to generate replies.
       </p>
     </section>
 
@@ -144,9 +146,25 @@
         Apple Foundation Models when those models are available on the device and enabled by Apple.
       </p>
       <p>
-        Some support-chat flows may use a locally configured AI endpoint depending on app
-        configuration and availability. In the shipping configuration, Peace is designed to avoid
-        unnecessary external transmission of your journal data.
+        If Apple Intelligence is not available on your device, the premium AI chat can use
+        <strong>Google Gemini</strong>, an AI service provided by Google LLC. Peace asks for your
+        explicit permission before sending anything to Google. If you do not allow it, nothing is
+        sent and the chat will not reply on that device.
+      </p>
+      <p>When you allow it, the following data is sent to Google each time you send a chat message:</p>
+      <ul>
+        <li>the messages you write in the chat and the previous messages of the same conversation;</li>
+        <li>a short summary of your recent mood (for example the overall trend and energy level).</li>
+      </ul>
+      <p>
+        Peace does not send your name, your individual daily notes, or any account identifiers to
+        Google. Google processes this data to generate the reply, under the
+        <a href="https://ai.google.dev/gemini-api/terms">Gemini API Additional Terms of Service</a>
+        and the <a href="https://policies.google.com/privacy">Google Privacy Policy</a>.
+      </p>
+      <p>
+        You can withdraw your permission at any time in <strong>Settings &gt; AI chat with Google
+        Gemini</strong>.
       </p>
     </section>
 
@@ -172,6 +190,10 @@
       <p>
         Peace does not sell your personal data and does not use third-party advertising SDKs inside
         the app.
+      </p>
+      <p>
+        The only third party that may receive your content is Google, and only for the AI chat as
+        described in section 2, after you give permission.
       </p>
       <p>
         Your data may still be included in Apple device backups or iCloud backups if those features
